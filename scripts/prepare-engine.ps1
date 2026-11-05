@@ -33,7 +33,14 @@ if (!(Test-Path $msi)) {
     if ($LASTEXITCODE -ne 0) { throw 'Engine download interrupted; rerun prepare:engine to resume.' }
     Move-Item -LiteralPath "$msi.download" -Destination $msi -Force
 }
-if ((Get-FileHash $msi -Algorithm SHA256).Hash.ToLowerInvariant() -ne $sha256) { throw 'Engine download checksum mismatch.' }
+# Use the .NET implementation directly: Get-FileHash is not available in every
+# Windows PowerShell module environment (including some hosted CI runners).
+$archiveStream = [IO.File]::OpenRead($msi)
+$algorithm = [Security.Cryptography.SHA256]::Create()
+try {
+    $actualHash = [BitConverter]::ToString($algorithm.ComputeHash($archiveStream)).Replace('-', '').ToLowerInvariant()
+} finally { $algorithm.Dispose(); $archiveStream.Dispose() }
+if ($actualHash -ne $sha256) { throw 'Engine download checksum mismatch.' }
 $image = Join-Path $cache 'image'
 New-Item -ItemType Directory -Force $image | Out-Null
 # Administrative extraction only: does not install LibreOffice or change file associations.

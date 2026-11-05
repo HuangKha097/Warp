@@ -18,6 +18,6 @@ Bộ chuyển đổi và logic chuyển đổi không thay đổi trong bản 0.
 - Giữ Alt + Shift → kéo → nhả phím với lớp mới trên Desktop thật; test renderer và state machine không thay thế kiểm tra input Windows toàn tuyến.
 - Mọi bố cục/tab Explorer, DPI/màn hình khác nhau và bộ cài trên Windows sạch.
 - Độ chính xác bố cục của tài liệu phức tạp, font thiếu, nội dung có mật khẩu và fixture trình chiếu.
-- Bản cài chưa ký mã, chưa publish GitHub Release.
+- Bản cài chưa ký mã. Prerelease v0.3.0 đã có tại https://github.com/HuangKha097/Warp/releases/tag/v0.3.0.
 
 Runtime và giấy phép: THIRD-PARTY-NOTICES.md. Hướng dẫn: HUONG-DAN.md.
