@@ -1,0 +1,2 @@
+.overlay-mode,.overlay-mode #root{background:transparent!important;width:100vw;height:100vh;overflow:hidden}
+.hold-layer{position:fixed;inset:0;background:transparent;user-select:none}

@@ -1,0 +1,85 @@
+# Warp
+
+**Windows MVP · v0.3.0 (prerelease)**
+
+[Download Windows installer](https://github.com/HuangKha097/Warp/releases/tag/v0.3.0) · [Hướng dẫn sử dụng](HUONG-DAN.md)
+
+![Warp circular Dock](docs/warp-preview.png)
+
+Windows file conversion from a transparent radial menu. Select a file in Explorer/Desktop, hold **Alt + Shift**, drag the selected file toward a format slice, and release the mouse to confirm. Releasing either modifier hides the layer and cancels an unfinished gesture.
+
+## Install and use
+
+1. Download and run `Warp-Setup-0.3.0.exe`. The installer includes the local conversion engine. **Users do not need to download or install LibreOffice, Microsoft Office, Node.js or any other conversion tool.**
+2. Warp runs in the system tray. Single-click a document in Explorer or on the Desktop.
+3. Hold Alt + Shift. A single circular ring with contiguous format slices appears around the selection.
+4. Keep the modifiers held, press the file icon, drag onto an enabled slice, and release the mouse. Then release the keys to dismiss the ring.
+5. The converted copy is written beside the original. Existing files are preserved using numbered names. Confirmed conversions continue in the background after the ring disappears.
+
+Unsupported destinations remain visible as disabled slices. Warp does not restructure a Word document into a spreadsheet or presentation. At screen edges the full circle moves inward just enough to fit, with a visible tether to the selected file; dragging can start from the original icon or the file in the center.
+
+The optional companion window can be opened from the tray. It supports file picking, status and revealing completed copies. Right-click the tray → Thoát to exit. Alt + Shift can also trigger Windows input-language switching; Warp observes this shortcut without changing Windows settings.
+
+## Supported sources and destinations
+
+| Source | Targets |
+|---|---|
+| DOCX | PDF, TXT, ODT |
+| DOC | PDF, TXT, DOCX |
+| ODT, RTF | PDF, DOCX, TXT |
+| TXT | PDF, DOCX, ODT |
+| XLSX | PDF, CSV, ODS |
+| XLS | PDF, CSV, XLSX |
+| ODS, CSV | PDF and compatible spreadsheet formats |
+| PPTX | PDF, ODP |
+| PPT | PDF, PPTX, ODP |
+| ODP | PDF, PPTX |
+
+PDF input/OCR, multiple file selection, directories and cloud-only placeholders are not supported. TXT/CSV are lossy formats. Layout depends on available fonts and the bundled engine's import/export support. Password-protected documents are not supported.
+
+## Local processing
+
+No account, backend server, database or cloud uploads are used. The bundled engine runs headlessly on a temporary snapshot of the input with an isolated profile per conversion. The app writes output copies with exclusive creation, so it never overwrites a pre-existing destination.
+
+## Develop and build
+
+Windows x64, Node.js 22.12+ or a compatible newer LTS, npm and .NET Framework 4.x are needed for development. End users only need the complete Warp installer.
+
+```powershell
+npm ci
+node node_modules/electron/install.js
+npm run prepare:engine
+npm run check
+npm test
+npm run test:engine
+npm run build
+npm run test:visual
+npm start
+```
+
+`prepare:engine` is a **build-time** step: downloads the pinned official LibreOffice Windows MSI, verifies SHA-256 and extracts an administrative image into `vendor/libreoffice`. It does not install LibreOffice into Windows or change file associations. The full unmodified runtime and its notices are included in the final installer. Build cache and engine binaries are ignored by Git.
+
+```powershell
+npm run package
+```
+
+This creates a per-user Windows installer in `release/`. The download is larger because the conversion engine is included. Builds are unsigned; code signing and automatic updates are not configured. GitHub CI builds and uploads an installer artifact; publishing a GitHub Release remains a maintainer action.
+
+## Architecture
+
+- `src/`: React/TypeScript, full annular SVG slices with matching hit testing, center file and drag ghost.
+- `electron/main.ts`: tray, companion window, transparent hold-only layer, validated IPC, notifications, conversion orchestration.
+- `electron/hold.ts`: gesture generation gate rejects stale selection lookups after modifier release.
+- `electron/conversion.ts`: bundled-engine discovery, format allowlist, isolated conversion, safe output naming.
+- `native/SelectionWatcher.cs`: observes Alt + Shift, reads foreground Explorer selection through Shell COM and icon coordinates through UI Automation. Selection capture runs on an STA worker so the key-release loop remains responsive.
+- `scripts/prepare-engine.ps1`: reproducible pinned engine packaging.
+
+The helper never simulates Ctrl+C and never reads the clipboard. Icon positions are estimated from UI Automation bounds; Explorer tabs, unusual layouts, DPI and multi-monitor combinations need manual acceptance checks. See `VALIDATION.md` for verification limits.
+
+## License
+
+Application code: MIT. The user-supplied Warp logo is separate artwork. Bundled engine: upstream licenses; see `THIRD-PARTY-NOTICES.md` and the original license files in the engine resources.
+
+## Interface in 0.3.0
+
+Monochrome circular Dock: charcoal surfaces, thin neutral borders and document glyphs. Icons magnify smoothly with pointer proximity, neighboring enabled icons respond with a cosine falloff, and an idle spring returns them to rest. Confirmed actions have a small bounce. The orbit enters with a short scale/fade on each hold; key release hides it immediately. Reduced-motion preferences disable magnification and bounce. The same radial component is used by the companion and overlay. This is a circular adaptation of the React Bits Dock reference supplied by the user, with no new Dock package dependency. The updated, cropped user logo replaces the prior artwork in all icon sizes.
