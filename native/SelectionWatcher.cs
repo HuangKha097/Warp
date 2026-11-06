@@ -8,6 +8,15 @@ using System.Windows.Automation;
 
 // Captures Explorer selection BEFORE Electron activates its overlay.
 class SelectionWatcher {
+  sealed class Request {public int Gesture;public IntPtr Window;}
+  static readonly AutoResetEvent captureReady=new AutoResetEvent(false);
+  static Request pending;
+  static void Release(object value){try{if(value!=null&&Marshal.IsComObject(value))Marshal.ReleaseComObject(value);}catch{}}
+  static void CaptureLoop(){
+    while(true){captureReady.WaitOne();var request=Interlocked.Exchange(ref pending,null);if(request==null)continue;
+      try{Capture(request.Gesture,request.Window);}catch{Error("Không đọc được lựa chọn. Hãy chọn lại tệp rồi giữ Alt + Shift.",request.Gesture);}
+    }
+  }
   [DllImport("user32.dll")] static extern short GetAsyncKeyState(int key);
   [DllImport("user32.dll")] static extern IntPtr GetForegroundWindow();
   [DllImport("user32.dll")] static extern bool SetProcessDpiAwarenessContext(IntPtr context);
@@ -17,7 +26,7 @@ class SelectionWatcher {
     foreach(char c in value) { if(c=='"'||c=='\\')b.Append('\\').Append(c);else if(c<32)b.Append("\\u"+((int)c).ToString("x4"));else b.Append(c); }
     return b.Append('"').ToString();
   }
-  static void Error(string value){Console.WriteLine("{\"error\":"+Json(value)+"}");}
+  static void Error(string value,int gesture){Console.WriteLine("{\"error\":"+Json(value)+",\"gesture\":"+gesture+"}");}
   static List<AutomationElement> SelectedElements(IntPtr hwnd){
     var root=AutomationElement.FromHandle(hwnd);
     var nodes=root.FindAll(TreeScope.Descendants,new PropertyCondition(AutomationElement.ControlTypeProperty,ControlType.ListItem));
@@ -27,35 +36,35 @@ class SelectionWatcher {
   }
   static void Emit(string file,AutomationElement node,int gesture){
     var rect=node.Current.BoundingRectangle;
-    if(rect.IsEmpty||node.Current.IsOffscreen){Error("Biểu tượng file không nằm trong vùng đang hiển thị.");return;}
+    if(rect.IsEmpty||node.Current.IsOffscreen){Error("Biểu tượng file không nằm trong vùng đang hiển thị.",gesture);return;}
     double x=rect.Left+(rect.Width>180?18:rect.Width/2),y=rect.Top+Math.Min(rect.Height/2,28);
     Console.WriteLine("{\"file\":"+Json(file)+",\"x\":"+((int)x)+",\"y\":"+((int)y)+",\"gesture\":"+gesture+"}");
   }
-  static void Capture(int gesture){
-    IntPtr hwnd=GetForegroundWindow();
+  static void Capture(int gesture,IntPtr hwnd){
     var cls=new StringBuilder(256);GetClassName(hwnd,cls,256);
     bool desktop=cls.ToString()=="Progman"||cls.ToString()=="WorkerW";
-    if(!desktop && cls.ToString()!="CabinetWClass") {Error("Hãy chọn file trong File Explorer hoặc Desktop trước.");return;}
+    if(!desktop && cls.ToString()!="CabinetWClass") {Error("Hãy chọn file trong File Explorer hoặc Desktop trước.",gesture);return;}
     object shellObject=null, windowsObject=null;
     try{
       shellObject=Activator.CreateInstance(Type.GetTypeFromProgID("Shell.Application"));
       dynamic shell=shellObject;windowsObject=shell.Windows();dynamic windows=windowsObject;
       var selectedNodes=SelectedElements(hwnd);
-      if(selectedNodes.Count!=1){Error("Vui lòng chọn đúng một file đang hiển thị.");return;}
+      if(selectedNodes.Count!=1){Error("Vui lòng chọn đúng một file đang hiển thị.",gesture);return;}
       if(!desktop){
         foreach(dynamic window in windows){
+          object documentObject=null,itemsObject=null,itemObject=null;
           try{
             if(new IntPtr((long)window.HWND)!=hwnd)continue;
-            dynamic items=window.Document.SelectedItems();
-            if(items.Count!=1){Error("Vui lòng chọn đúng một file.");return;}
-            string file=items.Item(0).Path;
-            if(!File.Exists(file)){Error("Chỉ hỗ trợ file đã có trên ổ đĩa.");return;}
+            documentObject=window.Document;itemsObject=((dynamic)documentObject).SelectedItems();dynamic items=itemsObject;
+            if(items.Count!=1){Error("Vui lòng chọn đúng một file.",gesture);return;}
+            itemObject=items.Item(0);string file=((dynamic)itemObject).Path;
+            if(!File.Exists(file)){Error("Chỉ hỗ trợ file đã có trên ổ đĩa.",gesture);return;}
             string label=selectedNodes[0].Current.Name;
             if(!String.Equals(label,Path.GetFileName(file),StringComparison.OrdinalIgnoreCase)&&!String.Equals(label,Path.GetFileNameWithoutExtension(file),StringComparison.OrdinalIgnoreCase))continue;
             Emit(file,selectedNodes[0],gesture);return;
-          }finally{if(Marshal.IsComObject(window))Marshal.ReleaseComObject(window);}
+          }finally{Release(itemObject);Release(itemsObject);Release(documentObject);Release(window);}
         }
-        Error("Không lấy được file từ cửa sổ Explorer này. Bạn có thể dùng nút Chọn file.");return;
+        Error("Không lấy được file từ cửa sổ Explorer này. Hãy chọn lại tệp rồi thử lại.",gesture);return;
       }
       // Desktop labels can omit extensions. Resolve only an unambiguous real file.
       string desktopLabel=selectedNodes[0].Current.Name;
@@ -64,19 +73,20 @@ class SelectionWatcher {
         if(!Directory.Exists(dir))continue;
         foreach(string file in Directory.GetFiles(dir)) if(String.Equals(Path.GetFileName(file),desktopLabel,StringComparison.OrdinalIgnoreCase)||String.Equals(Path.GetFileNameWithoutExtension(file),desktopLabel,StringComparison.OrdinalIgnoreCase))matches.Add(file);
       }
-      if(matches.Count!=1){Error("Không xác định được file Desktop. Hãy mở thư mục Desktop trong Explorer hoặc dùng Chọn file.");return;}
+      if(matches.Count!=1){Error("Không xác định được file Desktop. Hãy mở thư mục Desktop trong Explorer rồi chọn lại tệp.",gesture);return;}
       foreach(string file in matches)Emit(file,selectedNodes[0],gesture);
-    }catch{Error("Không đọc được lựa chọn. Hãy thử Chọn file trong Warp.");}
-    finally{if(windowsObject!=null&&Marshal.IsComObject(windowsObject))Marshal.ReleaseComObject(windowsObject);if(shellObject!=null&&Marshal.IsComObject(shellObject))Marshal.ReleaseComObject(shellObject);}
+    }catch{Error("Không đọc được lựa chọn. Hãy chọn lại tệp rồi giữ Alt + Shift.",gesture);}
+    finally{Release(windowsObject);Release(shellObject);}
   }
   [STAThread] static void Main(string[] args){
     try{SetProcessDpiAwarenessContext(new IntPtr(-4));}catch{}
     Console.OutputEncoding=new UTF8Encoding(false);Console.WriteLine("{\"ready\":true}");
+    var worker=new Thread(CaptureLoop);worker.IsBackground=true;worker.SetApartmentState(ApartmentState.STA);worker.Start();
     bool previous=false;int ticks=0;int sequence=0;int parent=0;if(args.Length>0)int.TryParse(args[0],out parent);
     while(true){
-      if(parent>0&&ticks++%25==0){try{if(System.Diagnostics.Process.GetProcessById(parent).HasExited)return;}catch{return;}}
+      if(ticks++%50==0){Console.WriteLine("{\"heartbeat\":true}");if(parent>0){try{using(var process=System.Diagnostics.Process.GetProcessById(parent)){if(process.HasExited)return;}}catch{return;}}}
       bool pressed=(GetAsyncKeyState(0x12)&0x8000)!=0&&(GetAsyncKeyState(0x10)&0x8000)!=0;
-      if(pressed&&!previous){int gesture=++sequence;Console.WriteLine("{\"held\":true,\"gesture\":"+gesture+"}");var thread=new Thread(()=>Capture(gesture));thread.IsBackground=true;thread.SetApartmentState(ApartmentState.STA);thread.Start();}
+      if(pressed&&!previous){int gesture=++sequence;var request=new Request{Gesture=gesture,Window=GetForegroundWindow()};Console.WriteLine("{\"held\":true,\"gesture\":"+gesture+"}");Interlocked.Exchange(ref pending,request);captureReady.Set();}
       if(!pressed&&previous)Console.WriteLine("{\"released\":true}");
       previous=pressed;Thread.Sleep(20);
     }

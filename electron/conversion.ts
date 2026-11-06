@@ -4,6 +4,7 @@ import { access, copyFile, mkdir, mkdtemp, readdir, rm, stat } from 'node:fs/pro
 import path from 'node:path';
 import os from 'node:os';
 import { pathToFileURL } from 'node:url';
+import type {Phase} from './jobs';
 
 export const routes: Record<string, string[]> = {
   docx:['pdf','txt','odt'], doc:['pdf','txt','docx'], odt:['pdf','docx','txt'], rtf:['pdf','docx','txt'],
@@ -28,7 +29,8 @@ export async function copyUnique(source: string, original: string, target: strin
   }
   throw new Error('Có quá nhiều file trùng tên.');
 }
-export async function convert(original: string, target: string, office: string): Promise<string> {
+export async function convert(original: string, target: string, office: string,options:{progress?:(phase:Phase)=>void;signal?:AbortSignal}={}): Promise<string> {
+  options.signal?.throwIfAborted();options.progress?.('preparing');
   if(!targets(original).includes(target)) throw new Error('Định dạng chuyển đổi không được hỗ trợ.');
   if(!(await stat(original)).isFile()) throw new Error('Vui lòng chọn một file.');
   const temp = await mkdtemp(path.join(os.tmpdir(),'warp-'));
@@ -37,17 +39,22 @@ export async function convert(original: string, target: string, office: string):
     const inputDir=path.join(temp,'input'), outputDir=path.join(temp,'output');
     await mkdir(inputDir); await mkdir(outputDir);
     const input=path.join(inputDir,path.basename(original)); await copyFile(original,input);
+    options.signal?.throwIfAborted();options.progress?.('converting');
     const filter = target === 'txt' ? 'txt:Text (encoded):UTF8' : target;
     await new Promise<void>((resolve,reject)=>{
       const child=spawn(office,[`-env:UserInstallation=${pathToFileURL(path.join(temp,'profile')).href}`,'--headless','--convert-to',filter,'--outdir',outputDir,input],{windowsHide:true,stdio:['ignore','pipe','pipe']});
       let timedOut=false; let log='';
       child.stdout.on('data',d=>{log=(log+d).slice(-4000);}); child.stderr.on('data',d=>{log=(log+d).slice(-4000);});
-      const timer=setTimeout(()=>{timedOut=true; child.kill();},120000);
-      child.on('error',e=>{clearTimeout(timer);reject(e);});
-      child.on('close',code=>{clearTimeout(timer); if(timedOut) reject(new Error('Chuyển đổi quá 2 phút. Hãy thử file nhỏ hơn.')); else if(code!==0) reject(new Error(`Không thể chuyển đổi tài liệu (${code}). ${log}`)); else resolve();});
+      const stop=()=>{if(child.pid&&process.platform==='win32'){const killer=spawn('taskkill',['/pid',String(child.pid),'/t','/f'],{windowsHide:true,stdio:'ignore'});killer.on('error',()=>child.kill());}else child.kill();};
+      const cleanup=()=>{clearTimeout(timer);options.signal?.removeEventListener('abort',stop);};
+      const timer=setTimeout(()=>{timedOut=true;stop();},120000);
+      options.signal?.addEventListener('abort',stop,{once:true});if(options.signal?.aborted)stop();
+      child.on('error',e=>{cleanup();reject(e);});
+      child.on('close',code=>{cleanup();if(options.signal?.aborted)reject(new Error('Đã hủy chuyển đổi khi thoát Warp.'));else if(timedOut) reject(new Error('Chuyển đổi quá 2 phút. Hãy thử file nhỏ hơn.')); else if(code!==0) reject(new Error(`Không thể chuyển đổi tài liệu (${code}). ${log}`)); else resolve();});
     });
     const output=(await readdir(outputDir)).find(f=>path.extname(f).toLowerCase()===`.${target}`);
     if(!output || !(await stat(path.join(outputDir,output))).size) throw new Error('Bộ chuyển đổi không tạo được file. File có thể bị khóa, hỏng hoặc có mật khẩu.');
+    options.signal?.throwIfAborted();options.progress?.('saving');
     return await copyUnique(path.join(outputDir,output),original,target);
   } finally { await rm(temp,{recursive:true,force:true,maxRetries:5,retryDelay:300}).catch(()=>{}); }
 }

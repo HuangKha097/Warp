@@ -1,8 +1,8 @@
 # Warp
 
-**Windows MVP · v0.3.0 (prerelease)**
+**Windows MVP · v0.4.0 (prerelease)**
 
-[Download Windows installer](https://github.com/HuangKha097/Warp/releases/tag/v0.3.0) · [Hướng dẫn sử dụng](HUONG-DAN.md)
+[Download Windows installer](https://github.com/HuangKha097/Warp/releases/tag/v0.4.0) · [Hướng dẫn sử dụng](HUONG-DAN.md)
 
 ![Warp circular Dock](docs/warp-preview.png)
 
@@ -10,15 +10,15 @@ Windows file conversion from a transparent radial menu. Select a file in Explore
 
 ## Install and use
 
-1. Download and run `Warp-Setup-0.3.0.exe`. The installer includes the local conversion engine. **Users do not need to download or install LibreOffice, Microsoft Office, Node.js or any other conversion tool.**
-2. Warp runs in the system tray. Single-click a document in Explorer or on the Desktop.
+1. Download and run `Warp-Setup-0.4.0.exe`. The installer includes the local conversion engine. **Users do not need to download or install LibreOffice, Microsoft Office, Node.js or any other conversion tool.**
+2. Warp starts silently in the system tray and is registered to run when you sign into Windows. No main/menu window opens. Single-click a document in Explorer or on the Desktop.
 3. Hold Alt + Shift. A single circular ring with contiguous format slices appears around the selection.
 4. Keep the modifiers held, press the file icon, drag onto an enabled slice, and release the mouse. Then release the keys to dismiss the ring.
 5. The converted copy is written beside the original. Existing files are preserved using numbered names. Confirmed conversions continue in the background after the ring disappears.
 
 Unsupported destinations remain visible as disabled slices. Warp does not restructure a Word document into a spreadsheet or presentation. At screen edges the full circle moves inward just enough to fit, with a visible tether to the selected file; dragging can start from the original icon or the file in the center.
 
-The optional companion window can be opened from the tray. It supports file picking, status and revealing completed copies. Right-click the tray → Thoát to exit. Alt + Shift can also trigger Windows input-language switching; Warp observes this shortcut without changing Windows settings.
+A small bottom-right progress card shows preparation, conversion, saving, elapsed time and queued files. Its loading bar is indeterminate while processing. Completed copies can be revealed in their folder; failures include a reason and Retry. You can select another file while a conversion runs; jobs are serialized independently of the current selection. Click the tray icon to reopen the latest status. Right-click the tray → Exit to stop Warp. The installer registers a per-user Windows startup entry and removes it on uninstall. Alt + Shift can also trigger Windows input-language switching; Warp observes this shortcut without changing Windows settings.
 
 ## Supported sources and destinations
 
@@ -54,6 +54,7 @@ npm test
 npm run test:engine
 npm run build
 npm run test:visual
+npm run test:runtime
 npm start
 ```
 
@@ -68,7 +69,7 @@ This creates a per-user Windows installer in `release/`. The download is larger 
 ## Architecture
 
 - `src/`: React/TypeScript, full annular SVG slices with matching hit testing, center file and drag ghost.
-- `electron/main.ts`: tray, companion window, transparent hold-only layer, validated IPC, notifications, conversion orchestration.
+- `electron/main.ts`: tray-only startup, transparent hold-only layer, non-activating progress card, validated IPC and conversion queue.
 - `electron/hold.ts`: gesture generation gate rejects stale selection lookups after modifier release.
 - `electron/conversion.ts`: bundled-engine discovery, format allowlist, isolated conversion, safe output naming.
 - `native/SelectionWatcher.cs`: observes Alt + Shift, reads foreground Explorer selection through Shell COM and icon coordinates through UI Automation. Selection capture runs on an STA worker so the key-release loop remains responsive.
@@ -82,4 +83,4 @@ Application code: MIT. The user-supplied Warp logo is separate artwork. Bundled 
 
 ## Interface in 0.3.0
 
-Monochrome circular Dock: charcoal surfaces, thin neutral borders and document glyphs. Icons magnify smoothly with pointer proximity, neighboring enabled icons respond with a cosine falloff, and an idle spring returns them to rest. Confirmed actions have a small bounce. The orbit enters with a short scale/fade on each hold; key release hides it immediately. Reduced-motion preferences disable magnification and bounce. The same radial component is used by the companion and overlay. This is a circular adaptation of the React Bits Dock reference supplied by the user, with no new Dock package dependency. The updated, cropped user logo replaces the prior artwork in all icon sizes.
+Monochrome circular Dock: charcoal surfaces, thin neutral borders and document glyphs. Icons magnify smoothly with pointer proximity, neighboring enabled icons respond with a cosine falloff, and an idle spring returns them to rest. Confirmed actions have a small bounce. The orbit enters with a short scale/fade on each hold; key release hides it immediately. Reduced-motion preferences disable magnification and bounce. There is no companion/menu window in v0.4.0; the ring appears only while the shortcut is held. This is a circular adaptation of the React Bits Dock reference supplied by the user, with no new Dock package dependency. The updated, cropped user logo replaces the prior artwork in all icon sizes.

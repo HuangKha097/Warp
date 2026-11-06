@@ -1,6 +1,6 @@
 {
   "name": "warp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "A local-first radial file converter for Windows",
   "author": "Warp contributors",
@@ -14,7 +14,8 @@
     "package": "npm run prepare:engine && npm run build && electron-builder --win nsis --x64",
     "prepare:engine": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-engine.ps1",
     "test:engine": "tsx --test tests/engine.integration.ts",
-    "test:visual": "electron scripts/visual-smoke.cjs"
+    "test:visual": "electron scripts/visual-smoke.cjs",
+    "test:runtime": "electron scripts/runtime-smoke.cjs"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -70,7 +71,8 @@
       "createStartMenuShortcut": true,
       "createDesktopShortcut": true,
       "perMachine": false,
-      "oneClick": true
+      "oneClick": true,
+      "include": "scripts/installer.nsh"
     }
   }
 }

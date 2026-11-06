@@ -1,17 +1,16 @@
-# Warp — hướng dẫn sử dụng
+# Warp 0.4.0 — hướng dẫn sử dụng
 
-1. Cài `Warp-Setup-0.3.0.exe`. Bộ chuyển đổi đã đi kèm: không cần tải hoặc cài LibreOffice, Office hay Node.js riêng.
-2. Warp chạy nền trong khay hệ thống. Có thể đóng cửa sổ chính bằng dấu ×.
-3. Trên Desktop hoặc trong Explorer, bấm **một lần để chọn một file**. Khi không giữ phím, bấm hai lần vẫn mở file theo hành vi của Windows.
-4. **Giữ Alt + Shift** để hiện lớp vòng tròn chia múi. Các định dạng áp dụng cho file sẽ sáng; các định dạng không áp dụng được làm mờ.
-5. Vẫn giữ hai phím, **nhấn giữ chuột vào file → kéo sang múi định dạng → thả chuột để xác nhận**.
-6. **Nhả Alt hoặc Shift** để ẩn vòng tròn. Nếu chưa xác nhận bằng cách thả chuột vào một múi hợp lệ, thao tác bị hủy. Tác vụ đã xác nhận sẽ tiếp tục chạy nền.
-7. File mới nằm cạnh bản gốc. Ví dụ `Bao-cao.docx` → `Bao-cao.pdf`; nếu trùng tên sẽ tạo `Bao-cao (1).pdf`.
+1. Thoát Warp bản cũ rồi cài `Warp-Setup-0.4.0.exe`. Bộ chuyển đổi đã đi kèm, không phải cài LibreOffice riêng.
+2. Warp mở âm thầm trong khay hệ thống bên đồng hồ; không hiện cửa sổ menu. Bản cài đăng ký chạy khi đăng nhập Windows. Nếu chưa thấy logo, kiểm tra mục biểu tượng ẩn (dấu ^).
+3. Trên Desktop hoặc trong Explorer, bấm một lần chọn một tệp. Giữ **Alt + Shift** để hiện vòng tròn.
+4. Vẫn giữ hai phím, nhấn giữ chuột trên tệp ở tâm, kéo sang múi định dạng phù hợp rồi thả chuột để xác nhận.
+5. Vòng tròn đóng sau khi xác nhận. Bảng nhỏ ở **góc phải dưới** báo đang chuẩn bị, đang chuyển đổi hoặc đang lưu bản sao, cùng thanh loading và thời gian chờ.
+6. Có thể chọn tệp khác và gọi vòng tròn tiếp trong lúc tệp trước đang xử lý; các yêu cầu sẽ xếp hàng và chạy lần lượt.
+7. Khi xong, bảng báo tên kết quả và có nút **Mở thư mục**. File mới nằm cạnh file gốc; trùng tên thì thêm số. Thành công tự ẩn sau khoảng 8 giây.
+8. Nếu thất bại, bảng giữ thông báo lý do và nút **Thử lại**. Một lỗi không chặn các lần chuyển tiếp theo.
 
-Vòng tròn sát mép màn hình sẽ dịch vào vừa đủ để hiện toàn bộ các múi, nối với file gốc bằng đường dẫn. Có thể bắt đầu kéo từ biểu tượng file gốc hoặc file ở tâm vòng tròn.
+Nhả Alt hoặc Shift trước khi thả vào múi hợp lệ sẽ hủy thao tác kéo. Các yêu cầu đã xác nhận tiếp tục chạy nền. Có thể bấm dấu × để ẩn bảng tiến trình; nhấn logo khay để xem lại trạng thái gần nhất.
 
-Nhấn biểu tượng khay để xem trạng thái, chọn file thủ công hoặc mở thư mục kết quả. Bấm phải biểu tượng → **Thoát** để tắt ứng dụng.
+**Tắt Warp:** bấm phải logo khay hệ thống → **Exit**. Warp sẽ dừng bộ nhận phím, hủy tác vụ đang chạy và thoát. App vẫn được đăng ký khởi động vào lần đăng nhập Windows sau; có thể tắt tự khởi động qua Startup Apps của Windows nếu cần.
 
-Bản hiện tại xử lý một file mỗi lần. Chưa hỗ trợ PDF đầu vào hoặc tự biến nội dung Word thành Excel/PowerPoint. File nguồn được giữ nguyên; xử lý diễn ra trên máy. Bản cài lớn hơn vì đã chứa bộ chuyển đổi.
-
-Alt + Shift có thể đồng thời đổi ngôn ngữ bàn phím Windows. Bản MVP chưa ký mã. Xem `VALIDATION.md` để biết các kiểm tra đã thực hiện và phần còn cần thử trên máy thật.
+Chưa hỗ trợ PDF đầu vào, chọn nhiều tệp cùng lúc, hoặc tự biến nội dung Word thành Excel/PowerPoint. Bản cài chưa ký mã. Xem `VALIDATION.md` để biết các phần đã và chưa kiểm chứng.

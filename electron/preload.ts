@@ -1,8 +1,7 @@
-import { contextBridge, ipcRenderer, webUtils } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('orbit', {
   state:()=>ipcRenderer.invoke('state'),
-  choose:()=>ipcRenderer.invoke('choose'),
-  accept:(file:File)=>ipcRenderer.invoke('accept',webUtils.getPathForFile(file)),
+  retry:()=>ipcRenderer.invoke('retry'),
   convert:(format:string)=>ipcRenderer.invoke('convert',format),
   reveal:()=>ipcRenderer.invoke('reveal'),
   hide:()=>ipcRenderer.invoke('hide'),
