@@ -23,7 +23,8 @@ jobs:
       - run: npm run build
       - run: npm run test:visual
       - run: npm run test:runtime
-      - run: npm run package
+      # Build artifacts only; release publication is a separate maintainer action.
+      - run: npm run package -- --publish never
       - uses: actions/upload-artifact@v4
         with:
           name: Warp-Windows
