@@ -9,14 +9,14 @@ app.whenReady().then(async()=>{
   const conversions=[],checks=[],actions=[];
   ipcMain.handle('fixture-convert',(_,format)=>{conversions.push(format);});
   ipcMain.handle('fixture-action',(_,action)=>{actions.push(action);});
-  const win=new BrowserWindow({width:1000,height:800,show:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+  const win=new BrowserWindow({width:1000,height:800,show:false,frame:false,thickFrame:false,hasShadow:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
   const js=expression=>win.webContents.executeJavaScript(expression);
   const scale=index=>js(`parseFloat(document.querySelectorAll('.dock-magnifier')[${index}].style.getPropertyValue('--dock-scale'))`);
   async function load(overlay){await win.loadFile(path.join(root,'dist/index.html'),{query:overlay?{mode:'overlay'}:{}});await delay(450);}
-  async function drag(x,y){for(const event of [{type:'mouseDown',x:500,y:400,button:'left',clickCount:1},{type:'mouseMove',x,y,button:'left'},{type:'mouseUp',x,y,button:'left',clickCount:1}]){win.webContents.sendInputEvent(event);await delay(70);}}
+  async function drag(x,y,from={x:500,y:400}){for(const event of [{type:'mouseDown',...from,button:'left',clickCount:1},{type:'mouseMove',x,y,button:'left'},{type:'mouseUp',x,y,button:'left',clickCount:1}]){win.webContents.sendInputEvent(event);await delay(70);}}
   async function snapshot(name,rect){await fs.mkdir(previews,{recursive:true});await fs.writeFile(path.join(previews,name),(await win.webContents.capturePage(rect)).toPNG());}
   async function assertClear(rect){const pixels=(await win.webContents.capturePage(rect)).toBitmap();for(let i=3;i<pixels.length;i+=4)assert.ok(pixels[i]<=2,`hole is covered: alpha ${pixels[i]}`);}
-  async function desktopFixture(){await js(`(()=>{const layer=document.createElement('div');layer.id='fixture-desktop';layer.style.cssText='position:fixed;inset:0;background:#151719;pointer-events:none';layer.innerHTML='<div style="position:absolute;left:480px;top:376px;width:40px;height:48px;background:#eee;border:1px solid #bbb;border-radius:3px;display:grid;place-items:center;color:#343434;font:600 15px Segoe UI">DOC</div><div style="position:absolute;left:440px;top:431px;width:120px;text-align:center;font:11px Segoe UI;color:#eee">Project Brief.docx</div>';document.body.prepend(layer);})()`);}
+  async function desktopFixture(anchor={x:500,y:400}){await js(`(()=>{const layer=document.createElement('div');layer.id='fixture-desktop';layer.style.cssText='position:fixed;inset:0;background:#151719;pointer-events:none';layer.innerHTML='<div style="position:absolute;left:${anchor.x-20}px;top:${anchor.y-24}px;width:40px;height:48px;background:#eee;border:1px solid #bbb;border-radius:3px;display:grid;place-items:center;color:#343434;font:600 15px Segoe UI">DOC</div><div style="position:absolute;left:${Math.max(4,anchor.x-60)}px;top:${anchor.y+31}px;width:120px;text-align:center;font:11px Segoe UI;color:#eee">Project Brief.docx</div>';document.body.prepend(layer);})()`);}
   try{
     await load(true);
     // Hosted Windows runners often disable UI animations globally. Exercise both
@@ -49,10 +49,39 @@ app.whenReady().then(async()=>{
     assert.equal(await scale(0),1);checks.push('reduced motion disables magnification');
     await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
     await js('document.getElementById("fixture-desktop").remove()');
-    const edgeFixture={file:'Project Brief.docx',path:'fixture/Project Brief.docx',targets:['pdf','txt','odt'],busy:false,helperReady:true,anchor:{x:36,y:400},presentation:1,job:null};
-    win.webContents.send('fixture-state',edgeFixture);await delay(400);
-    await assertClear({x:21,y:385,width:30,height:30});
-    checks.push('edge-positioned source file remains visible through the ring');
+    assert.deepEqual(await js(`(()=>{const s=getComputedStyle(document.querySelector('.orbit-entrance'));return [s.filter,s.maskImage];})()`),['none','none']);
+    const edgeFixture={file:'Project Brief.docx',path:'fixture/Project Brief.docx',targets:['pdf','txt','odt'],busy:false,helperReady:true,presentation:1,job:null};
+    let lastLayout,lastAnchor;
+    for(const [width,height] of [[1000,800],[480,320]]){
+      win.setSize(width,height);
+      const positions=[['top-left',24,24],['top',width/2,24],['top-right',width-24,24],['left',24,height/2],['right',width-24,height/2],['bottom-left',24,height-24],['bottom',width/2,height-24],['bottom-right',width-24,height-24]];
+      for(const [name,x,y] of positions){
+        const anchor={x,y};
+        win.webContents.send('fixture-state',{...edgeFixture,anchor,presentation:edgeFixture.presentation++,targets:width===480?['pdf','csv','ods']:edgeFixture.targets});await delay(300);
+        const layout=await js(`(()=>{const r=document.querySelector('.orbit-entrance').getBoundingClientRect(),h=document.querySelector('.radial-origin').getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,outer:r.width/2-5,inner:h.width/2+1,count:document.querySelectorAll('.radial-sector').length,labels:[...document.querySelectorAll('.dock-caption,.dock-status')].filter(n=>n.textContent).map(n=>{const r=n.getBoundingClientRect();return {left:r.left,top:r.top,right:r.right,bottom:r.bottom};})};})()`);
+        assert.ok(layout.labels.every(r=>r.left>=0&&r.top>=0&&r.right<=width&&r.bottom<=height),`label clipped at ${width}x${height} ${name}`);
+        await assertClear({x:x-12,y:y-12,width:24,height:24});
+        const frame=await win.webContents.capturePage(),pixels=frame.toBitmap(),size=frame.getSize();
+        const alpha=(px,py)=>pixels[(Math.round(py)*size.width+Math.round(px))*4+3];
+        for(let py=0;py<size.height;py++)for(let px=0;px<size.width;px++){
+          // Include the 1px outer rim and its antialiased edge, but no shadow halo.
+          if(Math.hypot(px-layout.x,py-layout.y)>layout.outer+3)assert.ok(alpha(px,py)<=2,`rectangular paint outside ring at ${name}: ${px},${py}`);
+        }
+        for(let i=0;i<layout.count;i++)for(const fraction of [.2,.55,.9])for(const offset of [-.25,0,.25]){
+          const angle=(-90+(i+offset)*360/layout.count)*Math.PI/180,radius=layout.inner+(layout.outer-layout.inner)*fraction;
+          assert.ok(alpha(layout.x+Math.cos(angle)*radius,layout.y+Math.sin(angle)*radius)>240,`slice cut out at ${name}`);
+        }
+        if(width===1000||name==='bottom-right'){
+          await desktopFixture(anchor);await delay(60);
+          await snapshot(`Warp-${width}-${name}.png`);
+          await js('document.getElementById("fixture-desktop").remove()');await delay(30);
+        }
+        lastLayout=layout;lastAnchor=anchor;
+      }
+    }
+    checks.push('all four corners and edges at normal/small work areas: clear source, intact slices, visible labels and no rectangular shadow pixels');
+    await drag(Math.round(lastLayout.x),Math.round(lastLayout.y-(lastLayout.inner+lastLayout.outer)/2),lastAnchor);
+    assert.deepEqual(conversions,['pdf','pdf']);checks.push('drag from the original corner-positioned file still converts once');
     win.setSize(370,228);
     await win.loadFile(path.join(root,'dist/index.html'),{query:{mode:'status'}});await delay(250);
     const base={file:null,path:null,targets:[],busy:false,helperReady:true,anchor:{x:0,y:0},presentation:0};
@@ -75,5 +104,5 @@ app.whenReady().then(async()=>{
     await fs.mkdir(path.join(root,'.cache'),{recursive:true});
     await fs.writeFile(path.join(root,'.cache/visual-check.json'),JSON.stringify({passed:true,conversions,checks},null,2));
     console.log('PASS:',checks.join('; '));win.destroy();app.exit(0);
-  }catch(error){await fs.mkdir(path.join(root,'.cache'),{recursive:true});await fs.writeFile(path.join(root,'.cache/visual-check.json'),JSON.stringify({passed:false,error:String(error),checks}));console.error(error);win.destroy();app.exit(1);}
+  }catch(error){await snapshot('Warp-visual-failure.png');await fs.mkdir(path.join(root,'.cache'),{recursive:true});await fs.writeFile(path.join(root,'.cache/visual-check.json'),JSON.stringify({passed:false,error:String(error),checks}));console.error(error);win.destroy();app.exit(1);}
 });

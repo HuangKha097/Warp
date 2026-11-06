@@ -66,8 +66,9 @@ async function handleWatch(event:WatchEvent){
   if(!accepted)return;
   const point=screen.screenToDipPoint({x:event.x!,y:event.y!});
   const display=screen.getDisplayNearestPoint(point);
-  anchor={x:point.x-display.bounds.x,y:point.y-display.bounds.y};
-  overlay.setBounds(display.bounds);presentation++;
+  const area=display.workArea;
+  anchor={x:point.x-area.x,y:point.y-area.y};
+  overlay.setBounds(area);presentation++;
   send();overlay.showInactive();diagnostic(`orbit-shown ${presentation}`);
 }
 function exit(){quitting=true;clearTimeout(closeTimer);selection.release();watcher?.stop();queue.dispose();app.quit();}
@@ -84,8 +85,8 @@ else{
   app.on('second-instance',()=>{});
   app.whenReady().then(async()=>{
     const preferences={preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true};
-    overlay=new BrowserWindow({width:520,height:520,transparent:true,frame:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,show:false,hasShadow:false,focusable:false,backgroundColor:'#00000000',webPreferences:preferences});
-    statusWindow=new BrowserWindow({width:370,height:228,frame:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,focusable:false,backgroundColor:'#1c1c1e',webPreferences:preferences});
+    overlay=new BrowserWindow({width:520,height:520,transparent:true,frame:false,thickFrame:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,show:false,hasShadow:false,focusable:false,backgroundColor:'#00000000',webPreferences:preferences});
+    statusWindow=new BrowserWindow({width:370,height:228,frame:false,thickFrame:false,hasShadow:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,focusable:false,backgroundColor:'#1c1c1e',webPreferences:preferences});
     configure(overlay);configure(statusWindow);
     tray=new Tray(nativeImage.createFromPath(path.join(app.getAppPath(),'assets','warp.ico')));
     tray.setToolTip('Warp · Alt + Shift');

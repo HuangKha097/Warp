@@ -10,6 +10,18 @@ test('whole circle stays visible near screen edges',()=>{
     assert.ok(center.x-outer>=0&&center.x+outer<=1000);assert.ok(center.y-outer>=0&&center.y+outer<=800);
   }
 });
+
+test('edge and corner layouts preserve the source without punching holes in slices',()=>{
+  for(const [width,height] of [[1000,800],[800,560],[480,320],[1920,1040]]){
+    for(const x of [24,100,width/2,width-100,width-24])for(const y of [24,100,height/2,height-100,height-24]){
+      const anchor={x,y},{center,outer,inner,originRadius}=ringLayout(anchor,width,height);
+      assert.ok(center.x-outer>=19.9&&center.x+outer<=width-19.9);
+      assert.ok(center.y-outer>=19.9&&center.y+outer<=height-19.9);
+      const distance=Math.hypot(center.x-x,center.y-y);
+      assert.ok(distance+originRadius<=inner-1.9||distance>=outer+originRadius+7.9,`source covered at ${width}x${height}, ${x},${y}`);
+    }
+  }
+});
 test('every slice accepts drops throughout its annular area, not only on its icon',()=>{
   const center={x:400,y:400},inner=80,outer=210,count=5;
   for(let i=0;i<count;i++)for(const offset of [-20,0,20]){

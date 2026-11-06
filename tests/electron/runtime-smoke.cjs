@@ -40,11 +40,18 @@ async function main(){
   const convert=()=>overlay.window.webContents.executeJavaScript('window.warp.convert("pdf")');
   const checks=[];
   assert.ok(windows.every(w=>!w.visible&&w.shows===0&&w.options.skipTaskbar));
+  assert.ok(windows.every(w=>w.options.thickFrame===false&&w.options.hasShadow===false));
   assert.deepEqual(tray.menu.map(item=>item.label),['Exit']);checks.push('startup is tray-only with Exit');
   const a=path.join(cache,'first.txt'),b=path.join(cache,'second.txt'),gone=path.join(cache,'retry.txt');
   await fs.writeFile(a,'Warp first document.');await fs.writeFile(b,'Warp second document.');
   async function select(id,file){watcher.emit('event',{held:true,gesture:id});watcher.emit('event',{file,gesture:id,x:500,y:400});await until(async()=>{const s=await read();return overlay.visible&&s.path===file;},10000);}
-  await select(1,a);await convert();assert.equal(overlay.visible,false);assert.equal(status.visible,true);
+  await select(1,a);
+  const selectedPoint=electron.screen.screenToDipPoint({x:500,y:400});
+  const workArea=electron.screen.getDisplayNearestPoint(selectedPoint).workArea;
+  assert.deepEqual(overlay.window.getBounds(),workArea);
+  assert.deepEqual((await read()).anchor,{x:selectedPoint.x-workArea.x,y:selectedPoint.y-workArea.y});
+  checks.push('frameless windows disable native shadows; overlay uses display work area and matching local coordinates');
+  await convert();assert.equal(overlay.visible,false);assert.equal(status.visible,true);
   const firstState=await read();assert.equal(firstState.job.status,'running');checks.push('conversion hides full-screen overlay and shows progress immediately');
   watcher.emit('event',{released:true});await select(2,b);assert.equal((await read()).busy,false);
   await convert();assert.equal((await read()).job.queued,1);watcher.emit('event',{released:true});

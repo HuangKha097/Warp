@@ -21,8 +21,8 @@ npm run test:runtime
 | TypeScript | Renderer, Electron và contract IPC; chặn biến/import/tham số không dùng |
 | Unit | Đích chuyển đổi tương thích; đầu ra không ghi đè; giữ/nhả phím; lựa chọn đến trễ; xếp hàng, lỗi/retry, hủy khi thoát; vùng thả; spring; phục hồi helper |
 | Engine | Bộ chuyển đổi đã đóng gói được ưu tiên, tạo PDF/đích hỗ trợ và giữ nguyên đầu vào |
-| Renderer Electron | Tâm không có icon/nhãn vẽ lại, alpha tối đa 2/255; lỗ trong suốt ở mép màn hình; kéo PDF đúng một lần; chặn đích sai; hover/spring/reduced motion; bảng tiến trình và các nút thao tác |
-| Runtime Electron | Main/preload/renderer thật và bộ chuyển đổi thật; startup không mở menu; xác nhận chuyển đổi đóng overlay; tệp thứ hai được chọn và xếp hàng khi tệp đầu đang chạy; lỗi không khóa phím tắt; tệp sau chuyển thành công; reset helper và Exit |
+| Renderer Electron | Tâm không có icon/nhãn vẽ lại, alpha tối đa 2/255; bốn góc và bốn mép trên hai kích thước vùng làm việc: tệp gốc rõ, múi nguyên vẹn, nhãn không tràn, ngoài viền không có pixel bóng hình chữ nhật; kéo từ tệp ở góc vẫn chuyển PDF đúng một lần; chặn đích sai; hover/spring/reduced motion; bảng tiến trình và các nút thao tác |
+| Runtime Electron | Main/preload/renderer thật và bộ chuyển đổi thật; cửa sổ tắt shadow/khung Windows, overlay dùng work area và tọa độ tương ứng; startup không mở menu; xác nhận chuyển đổi đóng overlay; tệp thứ hai được chọn và xếp hàng khi tệp đầu đang chạy; lỗi không khóa phím tắt; tệp sau chuyển thành công; reset helper và Exit |
 
 Harness runtime thay thế nguồn sự kiện bàn phím/Explorer và cách trình bày cửa sổ/khay. Nó không thao tác Desktop của người phát triển và không đăng ký startup trên máy khi chạy kiểm tra. Renderer dùng nền Desktop giả lập để chụp ảnh minh họa.
 

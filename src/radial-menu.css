@@ -1,5 +1,5 @@
 .radial-menu{position:relative;touch-action:none;user-select:none;isolation:isolate;color:#f4f4f5}
-.orbit-entrance{position:absolute;transform-origin:center;filter:drop-shadow(0 12px 22px #0005)}
+.orbit-entrance{position:absolute;transform-origin:center}
 .radial-orbit{position:absolute;inset:0;overflow:visible}
 .radial-rim{fill:none;stroke:#ffffff1f;stroke-width:1}
 .radial-sector{cursor:pointer;outline:none}
@@ -7,7 +7,7 @@
 .radial-sector.is-active>path,.radial-sector:focus-visible>path{fill:#363638;stroke:#ffffff35;stroke-width:1}
 .radial-sector:focus-visible>path{stroke:#ffffffbb;stroke-width:1.5}
 .radial-sector.is-disabled{cursor:default}.radial-sector.is-disabled>path{fill:#202021;stroke:#ffffff09}
-.dock-slot{position:absolute;width:0;height:0;pointer-events:none;text-align:center}
+.dock-slot{position:absolute;width:0;height:0;pointer-events:none;text-align:center;transform:scale(var(--ring-scale,1));transform-origin:0 0}
 .dock-magnifier{position:absolute;left:-24px;top:-24px;width:48px;height:48px;transform:translateY(var(--dock-lift,0px)) scale(var(--dock-scale,1));transform-origin:center;will-change:transform}
 .dock-face{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(180deg,#3b3b3d,#2b2b2d);border:1px solid #ffffff12;box-shadow:inset 0 1px 0 #ffffff09,0 4px 9px #0003;color:#e4e4e7}
 .document-glyph{width:26px;height:32px;flex-shrink:0;display:block}

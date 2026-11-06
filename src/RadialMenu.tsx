@@ -13,10 +13,11 @@ export default function RadialMenu({file,targets,busy,anchor,width,height,presen
   const [active,setActive]=useState<string|null>(null);
   const root=useRef<HTMLDivElement>(null),entrance=useRef<HTMLDivElement>(null),ghost=useRef<HTMLDivElement>(null);
   const dragging=useRef(false),committing=useRef(false);
-  const {center,inner,outer}=ringLayout(anchor,width,height);
+  const {center,inner,outer,originRadius}=ringLayout(anchor,width,height);
+  const visualScale=outer/216;
   const formats=[...new Set([...primary,...targets])],step=360/formats.length;
   const radius=(inner+outer)/2;
-  const points=formats.map((format,i)=>{const a=(-90+i*step)*Math.PI/180;return {x:center.x+Math.cos(a)*radius,y:center.y+Math.sin(a)*radius-10,enabled:!!file&&targets.includes(format)&&!busy};});
+  const points=formats.map((format,i)=>{const a=(-90+i*step)*Math.PI/180;return {x:center.x+Math.cos(a)*radius,y:center.y+Math.sin(a)*radius-10*visualScale,enabled:!!file&&targets.includes(format)&&!busy};});
   const motion=useDockMotion(points);
   const id=useId().replace(/:/g,'');
 
@@ -51,12 +52,8 @@ export default function RadialMenu({file,targets,busy,anchor,width,height,presen
   function release(e:PointerEvent){if(!dragging.current)return;const format=hit(local(e));reset();if(format)void choose(format);}
   const shifted=Math.hypot(center.x-anchor.x,center.y-anchor.y)>2;
   const bounds={left:center.x-outer-5,top:center.y-outer-5,width:(outer+5)*2,height:(outer+5)*2};
-  // Mask after the drop shadow, so neither paint nor shadow covers the original file.
-  const centerMask=`radial-gradient(circle at ${outer+5}px ${outer+5}px, transparent ${inner-1}px, #000 ${inner}px)`;
-  const originMask=`radial-gradient(circle at ${anchor.x-bounds.left}px ${anchor.y-bounds.top}px, transparent 43px, #000 44px)`;
-  const ringStyle={...bounds,maskImage:shifted?`${centerMask},${originMask}`:centerMask,maskComposite:'intersect'} as CSSProperties;
   return <div className={`radial-menu ${busy?'is-busy':''}`} ref={root} style={{width,height}} onPointerMove={move} onPointerUp={release} onPointerCancel={reset} onPointerLeave={()=>{if(!dragging.current){setActive(null);motion.move(null);}}} aria-label="Vòng tròn chuyển đổi">
-    <div ref={entrance} className="orbit-entrance" style={ringStyle}>
+    <div ref={entrance} className="orbit-entrance" style={{...bounds,'--ring-scale':visualScale} as CSSProperties}>
       <svg className="radial-orbit" width="100%" height="100%" viewBox={`${-outer-5} ${-outer-5} ${(outer+5)*2} ${(outer+5)*2}`}>
         <defs><linearGradient id={`${id}-surface`} x2="0" y2="1"><stop stopColor="#2b2b2c"/><stop offset="1" stopColor="#202021"/></linearGradient></defs>
         <circle r={outer+1} className="radial-rim"/>
@@ -70,7 +67,7 @@ export default function RadialMenu({file,targets,busy,anchor,width,height,presen
       </div>;})}
     </div>
     <button className="radial-origin" style={{left:center.x,top:center.y,width:inner*2-2,height:inner*2-2}} aria-label={file?`Kéo ${file} sang định dạng`:'Vùng tệp gốc'} disabled={busy||!file} onPointerDown={begin}/>
-    {shifted&&<button className="radial-origin" style={{left:anchor.x,top:anchor.y,width:86,height:86}} aria-label="Kéo từ tệp gốc đã chọn" disabled={busy||!file} onPointerDown={begin}/>}
+    {shifted&&<button className="radial-origin" style={{left:anchor.x,top:anchor.y,width:originRadius*2,height:originRadius*2}} aria-label="Kéo từ tệp gốc đã chọn" disabled={busy||!file} onPointerDown={begin}/>}
     <div className="file-ghost" ref={ghost} hidden aria-hidden="true"><DocumentGlyph format={file?.split('.').pop()}/></div>
   </div>;
 }
