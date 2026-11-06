@@ -11,6 +11,8 @@ const assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'../..');
 const cache=path.join(root,'.cache/runtime-smoke',String(Date.now()));
 require('node:fs').mkdirSync(cache,{recursive:true});
+require('node:fs').mkdirSync(path.join(cache,'profile'),{recursive:true});
+require('node:fs').writeFileSync(path.join(cache,'profile/settings.json'),JSON.stringify({language:'vi',onboardingCompleted:true,launchAtLogin:false}));
 app.setPath('userData',path.join(cache,'profile'));app.setAppPath(root);
 let watcher,tray,quit=false;
 const windows=[];
@@ -43,7 +45,7 @@ async function main(){
   assert.ok(windows.every(w=>w.options.thickFrame===false&&w.options.hasShadow===false));
   assert.equal(status.options.transparent,true);
   assert.equal(status.options.backgroundColor,'#00000000');
-  assert.deepEqual(tray.menu.map(item=>item.label),['Exit']);checks.push('startup is tray-only with Exit');
+  assert.deepEqual(tray.menu.filter(item=>item.label).map(item=>item.label),['Cài đặt…','Hướng dẫn sử dụng…','Exit']);checks.push('returning startup is tray-only with Settings, guide and Exit');
   const a=path.join(cache,'first.txt'),b=path.join(cache,'second.txt'),gone=path.join(cache,'retry.txt');
   await fs.writeFile(a,'Warp first document.');await fs.writeFile(b,'Warp second document.');
   async function select(id,file){watcher.emit('event',{held:true,gesture:id});watcher.emit('event',{file,gesture:id,x:500,y:400});await until(async()=>{const s=await read();return overlay.visible&&s.path===file;},10000);}
@@ -68,8 +70,8 @@ async function main(){
   checks.push('later conversion succeeds after a real source-file error');
   watcher.emit('reset');assert.equal((await read()).helperReady,false);watcher.emit('event',{ready:true});
   await select(5,b);watcher.emit('event',{released:true});assert.equal(overlay.visible,false);checks.push('helper reset and next gesture recover correctly');
-  tray.menu[0].click();assert.ok(quit&&watcher.stopped);checks.push('Exit stops helper and quits');
+  tray.menu.find(item=>item.label==='Exit').click();assert.ok(quit&&watcher.stopped);checks.push('Exit stops helper and quits');
   await fs.writeFile(path.join(root,'.cache/runtime-check.json'),JSON.stringify({passed:true,checks},null,2));
   console.log('PASS:',checks.join('; '));app.exit(0);
 }
-main().catch(async error=>{try{tray?.menu?.[0]?.click();await fs.writeFile(path.join(root,'.cache/runtime-check.json'),JSON.stringify({passed:false,error:String(error)}));}finally{console.error(error);app.exit(1);}});
+main().catch(async error=>{try{tray?.menu?.find(item=>item.label==='Exit')?.click();await fs.writeFile(path.join(root,'.cache/runtime-check.json'),JSON.stringify({passed:false,error:String(error)}));}finally{console.error(error);app.exit(1);}});

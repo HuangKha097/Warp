@@ -19,20 +19,26 @@ export async function findOffice(bundledRoot?:string): Promise<string | null> {
   for(const file of candidates) { try { await access(file,constants.X_OK); return file; } catch {} }
   return null;
 }
-export async function copyUnique(source: string, original: string, target: string): Promise<string> {
+export async function copyUnique(source: string, original: string, target: string, directory?: string): Promise<string> {
   const parsed = path.parse(original);
   for(let i=0;i<10000;i++) {
-    const dest = path.join(parsed.dir,`${parsed.name}${i ? ` (${i})` : ''}.${target}`);
+    const dest = path.join(directory ?? parsed.dir,`${parsed.name}${i ? ` (${i})` : ''}.${target}`);
     if(path.resolve(dest).toLowerCase()===path.resolve(original).toLowerCase()) continue;
     try { await copyFile(source,dest,constants.COPYFILE_EXCL); return dest; }
     catch(error) { if((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
   }
   throw new Error('Có quá nhiều file trùng tên.');
 }
-export async function convert(original: string, target: string, office: string,options:{progress?:(phase:Phase)=>void;signal?:AbortSignal}={}): Promise<string> {
+export async function convert(original: string, target: string, office: string,options:{progress?:(phase:Phase)=>void;signal?:AbortSignal;outputDirectory?:string}={}): Promise<string> {
   options.signal?.throwIfAborted();options.progress?.('preparing');
   if(!targets(original).includes(target)) throw new Error('Định dạng chuyển đổi không được hỗ trợ.');
   if(!(await stat(original)).isFile()) throw new Error('Vui lòng chọn một file.');
+  async function checkDestination(){
+    if(!options.outputDirectory)return;
+    try{if(!(await stat(options.outputDirectory)).isDirectory())throw new Error();await access(options.outputDirectory,constants.W_OK);}
+    catch{throw new Error('Không thể truy cập thư mục lưu đã chọn. Hãy chọn lại trong Cài đặt.');}
+  }
+  await checkDestination();
   const temp = await mkdtemp(path.join(os.tmpdir(),'warp-'));
   try {
     // Work on a snapshot; the converter never receives the original path.
@@ -55,6 +61,7 @@ export async function convert(original: string, target: string, office: string,o
     const output=(await readdir(outputDir)).find(f=>path.extname(f).toLowerCase()===`.${target}`);
     if(!output || !(await stat(path.join(outputDir,output))).size) throw new Error('Bộ chuyển đổi không tạo được file. File có thể bị khóa, hỏng hoặc có mật khẩu.');
     options.signal?.throwIfAborted();options.progress?.('saving');
-    return await copyUnique(path.join(outputDir,output),original,target);
+    await checkDestination();
+    return await copyUnique(path.join(outputDir,output),original,target,options.outputDirectory);
   } finally { await rm(temp,{recursive:true,force:true,maxRetries:5,retryDelay:300}).catch(()=>{}); }
 }

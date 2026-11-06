@@ -11,7 +11,7 @@ npm run prepare:engine
 npm start
 ```
 
-`npm start` build rồi chạy ứng dụng trong khay hệ thống. Giữ Alt + Shift trên một tệp đã chọn trong Desktop/Explorer để mở vòng tròn.
+`npm start` build rồi chạy ứng dụng. Hồ sơ mới hiện onboarding một lần; sau khi hoàn tất/bỏ qua, các lần chạy sau chỉ hiện icon khay. Giữ Alt + Shift trên một tệp đã chọn trong Desktop/Explorer để mở vòng tròn. Nhấn phải icon khay để mở Settings hoặc xem lại hướng dẫn.
 
 ## Build và đóng gói
 
@@ -40,6 +40,14 @@ Bộ cài NSIS được tạo trong `release/`. CI chạy kiểm tra và lưu b�
 `ProgressCard.tsx` render chữ, nút, trạng thái và thời gian bằng React DOM. `progress.css` xử lý spinner, thanh loading và góc bo. Chỉ logo thương hiệu dùng ảnh; toàn bộ hộp thông báo không được dựng từ ảnh chụp hoặc canvas.
 
 Cửa sổ thông báo dùng nền trong suốt, tắt native shadow và Windows thick frame. Màu nền chỉ được vẽ trên card bo góc để các góc ngoài luôn trong suốt.
+
+`Companion.tsx` chứa onboarding ba bước và Settings. Module này được tải khi cần; GIF và poster trong `assets/onboarding/` dùng cùng minh họa đã duyệt. Reduced motion dùng PNG, người dùng có thể bật/tắt chuyển động. Cửa sổ có thể cuộn trên màn hình nhỏ; đóng cửa sổ vẫn giữ Warp trong khay.
+
+`preferences.ts` lưu `%APPDATA%\Warp\settings.json` với phiên bản schema, ghi file tạm rồi rename và tuần tự hóa các thay đổi. JSON hỏng được giữ lại dưới tên `.invalid-*`. Không dùng database. Main process xác thực IPC, thư mục đầu ra và quyền ghi; renderer không có API mở URL hoặc đường dẫn tùy ý. Thư mục cài ứng dụng do NSIS quản lý, Settings chỉ hiển thị vị trí.
+
+Thư mục đích được chụp tại thời điểm enqueue, bao gồm retry; đổi Settings không di chuyển tác vụ đã xác nhận. Bản gốc và đầu ra trùng tên luôn được bảo vệ bằng `COPYFILE_EXCL`.
+
+NSIS dùng wizard có lựa chọn ngôn ngữ, trang MIT với ô đồng ý không tick sẵn và link GitHub, cùng trang thư mục cài. `installer-language` trong thư mục cài cung cấp ngôn ngữ ban đầu; hồ sơ đã có Settings giữ lựa chọn cũ. Đăng ký startup do app quản lý ở lần chạy đầu trong bản đã đóng gói; các lần cập nhật không ghi đè lựa chọn hiện có. Bản dev và test không đăng ký startup. Bộ cài không tạo shortcut Desktop; có shortcut Start Menu.
 
 ## Kiểm thử
 

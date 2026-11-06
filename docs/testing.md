@@ -15,6 +15,7 @@ npm run test:engine
 npm run build
 npm run test:visual
 npm run test:runtime
+npm run test:setup
 ```
 
 | Lớp kiểm tra | Phạm vi |
@@ -25,6 +26,8 @@ npm run test:runtime
 | Engine | Bộ chuyển đổi đã đóng gói được ưu tiên, tạo PDF/đích hỗ trợ và giữ nguyên đầu vào |
 | Renderer Electron | Tâm không có icon/nhãn vẽ lại, alpha tối đa 2/255; bốn góc và bốn mép trên hai kích thước vùng làm việc: tệp gốc rõ, múi nguyên vẹn, nhãn không tràn, ngoài viền không có pixel bóng hình chữ nhật; kéo từ tệp ở góc vẫn chuyển PDF đúng một lần; chặn đích sai; hover/spring/reduced motion; bảng tiến trình và các nút thao tác |
 | Runtime Electron | Main/preload/renderer thật và bộ chuyển đổi thật; cửa sổ tắt shadow/khung Windows, overlay dùng work area và tọa độ tương ứng; startup không mở menu; xác nhận chuyển đổi đóng overlay; tệp thứ hai được chọn và xếp hàng khi tệp đầu đang chạy; lỗi không khóa phím tắt; tệp sau chuyển thành công; reset helper và Exit |
+| Preferences | Mặc định cùng thư mục gốc, ghi tuần tự/nguyên tử, khôi phục sau restart, giữ JSON hỏng, chặn tùy chọn/đường dẫn không hợp lệ; mỗi tác vụ giữ đích đã chọn |
+| Onboarding/Settings Electron | Hồ sơ mới mở hướng dẫn; hoàn tất/bỏ qua lưu trạng thái và ẩn về khay; GIF/PNG và reduced motion; radio cùng thư mục gốc tick sẵn; hủy/chọn thư mục; PDF thật vào thư mục riêng; Việt/Anh cập nhật UI; link MIT cố định; chặn ghi Settings từ overlay; xem lại hướng dẫn không reset tùy chọn |
 
 Harness runtime thay thế nguồn sự kiện bàn phím/Explorer và cách trình bày cửa sổ/khay. Nó không thao tác Desktop của người phát triển và không đăng ký startup trên máy khi chạy kiểm tra. Renderer dùng nền Desktop giả lập để chụp ảnh minh họa.
 
@@ -38,11 +41,14 @@ Với một tệp hợp lệ đang chọn, probe gọi API 5 lần và không gh
 
 Các biên nhận nằm trong `.cache/engine-check.json`, `.cache/visual-check.json` và `.cache/runtime-check.json`. Ảnh renderer nằm trong `.cache/visual-smoke/previews/`. Chạy lại kiểm tra sẽ cập nhật các đầu ra này; chúng không được commit.
 
+`test:setup` dùng hồ sơ riêng dưới `.cache/setup-smoke/` và ghi `.cache/setup-check.json`. Nó chạy main/preload/renderer và engine thật; thay thế tray, bộ đọc lựa chọn, hộp chọn thư mục và thao tác mở trình duyệt. Không thay đổi startup hoặc Desktop của người phát triển. Kiểm tra này xác nhận URL MIT được yêu cầu mở, không truy cập GitHub thật.
+
 ## Cần nghiệm thu thủ công
 
 - Chọn tệp trên Desktop/Explorer, giữ Alt + Shift, kéo sang đích, nhả phím để hủy; lặp lại với tệp khác sau thành công và sau lỗi.
 - Nhiều màn hình, DPI khác nhau, Explorer có nhiều tab và tệp nằm sát các mép màn hình.
 - Cài/gỡ trên Windows sạch, đăng nhập lại để kiểm tra tự khởi động và mục HKCU Run; macro installer được kiểm tra khi đóng gói, chưa được nghiệm thu bằng reboot máy sạch.
+- Bộ cài mới: chọn ngôn ngữ, Next bị khóa khi chưa tick đồng ý MIT, link mở GitHub, hủy cài không ghi ứng dụng, chọn thư mục cài tùy chỉnh; cài/cập nhật vẫn giữ lựa chọn startup đã tắt.
 - Tài liệu phức tạp, font thiếu, bảng biểu và bản trình chiếu thực tế. Không suy ra độ chính xác mọi tài liệu từ fixture nhỏ.
 
 Hộp thông báo được kiểm tra như giao diện React thật: thời gian tăng khi chạy, nội dung thay đổi theo tác vụ, nút Mở thư mục/Thử lại gọi hành động tương ứng. Các góc bo của cửa sổ được kiểm tra pixel trong suốt ở cả trạng thái đang chạy, thành công, lỗi chuyển đổi và lỗi đọc lựa chọn. Ảnh trong `.cache/` chỉ là đầu ra kiểm tra.

@@ -34,6 +34,19 @@ test('duplicate submissions do not create duplicate work and Exit cancels only a
   const b=queue.enqueue('B.docx','pdf');queue.dispose();await flush();
   assert.ok(signal!.aborted);assert.equal(b.status,'queued');assert.throws(()=>queue.enqueue('C.docx','pdf'),/thoát/);
 });
+
+test('each queued job keeps its chosen destination until it runs',async()=>{
+  const first=deferred<string>(),destinations:(string|undefined)[]=[];
+  const queue=new JobQueue(async(_input,_target,_progress,_signal,destination)=>{
+    destinations.push(destination);return destinations.length===1?first.promise:'copy.pdf';
+  },()=>{});
+  const a=queue.enqueue('A.docx','pdf','chosen-before-change');
+  const b=queue.enqueue('B.docx','pdf','chosen-for-second');
+  const c=queue.enqueue('C.docx','pdf');
+  first.resolve('first.pdf');await flush();await flush();
+  assert.deepEqual(destinations,['chosen-before-change','chosen-for-second',undefined]);
+  assert.ok([a,b,c].every(job=>job.status==='success'));queue.dispose();
+});
 test('late selection lookups cannot replace a newer file or reopen a released orbit',async()=>{
   const selection=new SelectionSession(),slow=deferred<void>();
   selection.press(1);const old=selection.capture(1,{file:'A.docx',x:1,y:1},()=>slow.promise);

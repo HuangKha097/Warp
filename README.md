@@ -7,18 +7,18 @@
 <p align="center">Chuyển đổi tài liệu ngay trên Desktop và File Explorer.</p>
 
 <p align="center">
-  <a href="https://github.com/HuangKha097/Warp/releases/tag/v0.4.4"><strong>Tải cho Windows</strong></a>
+  <a href="https://github.com/HuangKha097/Warp/releases"><strong>Tải cho Windows</strong></a>
   &nbsp;·&nbsp;
   <a href="https://github.com/HuangKha097/Warp/issues">Báo lỗi</a>
 </p>
 
-<p align="center">Windows x64 · Phiên bản thử nghiệm 0.4.4</p>
+<p align="center">Windows x64 · Phiên bản thử nghiệm 0.5.0</p>
 
 <p align="center">
   <img src="docs/assets/radial-menu.png" width="440" alt="Vòng tròn chọn định dạng của Warp">
 </p>
 
-Warp mở một vòng tròn định dạng quanh tệp đang chọn khi bạn giữ **Alt + Shift**. Kéo sang định dạng cần dùng để tạo bản chuyển đổi, ngay tại thư mục của tệp gốc.
+Warp mở một vòng tròn định dạng quanh tệp đang chọn khi bạn giữ **Alt + Shift**. Kéo sang định dạng cần dùng để tạo bản chuyển đổi. Mặc định bản sao nằm cùng thư mục với tệp gốc.
 
 - **Xử lý trên máy** — tài liệu không được tải lên dịch vụ đám mây.
 - **Giữ nguyên bản gốc** — tạo tệp mới, tự thêm số khi tên đã tồn tại.
@@ -26,9 +26,11 @@ Warp mở một vòng tròn định dạng quanh tệp đang chọn khi bạn gi
 
 ## Cài đặt
 
-Tải **Warp-Setup-0.4.4.exe** tại [Releases](https://github.com/HuangKha097/Warp/releases/tag/v0.4.4) và chạy bộ cài. Bộ chuyển đổi đã được tích hợp, không cần cài LibreOffice hoặc Microsoft Office riêng.
+Tải bộ cài **Warp-Setup-*.exe** tại [Releases](https://github.com/HuangKha097/Warp/releases) và chạy bộ cài. Bộ chuyển đổi đã được tích hợp, không cần cài LibreOffice hoặc Microsoft Office riêng.
 
-Nếu đang dùng Warp, chọn **Exit** từ biểu tượng khay trước khi cập nhật. Warp được đăng ký chạy khi đăng nhập Windows; bạn có thể tắt tùy chọn này trong **Startup Apps**.
+Từ phiên bản 0.5, bộ cài cho phép chọn ngôn ngữ, yêu cầu đồng ý [giấy phép MIT](LICENSE), có link xem giấy phép trên GitHub và cho chọn thư mục cài ứng dụng. Lần chạy đầu hiển thị hướng dẫn minh họa ba bước; hoàn tất hoặc bỏ qua để Warp về khay hệ thống.
+
+Nếu đang dùng Warp, chọn **Exit** từ biểu tượng khay trước khi cập nhật. Warp mặc định chạy cùng Windows; có thể tắt trong **Cài đặt** hoặc **Startup Apps** của Windows. Cập nhật không bật lại lựa chọn khởi động đã tắt.
 
 ## Sử dụng
 
@@ -39,7 +41,19 @@ Nếu đang dùng Warp, chọn **Exit** từ biểu tượng khay trước khi c
 
 Nhả Alt hoặc Shift trước khi xác nhận để hủy thao tác. Các tác vụ đã xác nhận tiếp tục chạy nền; bạn có thể chọn tệp khác để chuyển đổi tiếp. Nếu có lỗi, thông báo hiển thị lý do và tùy chọn **Thử lại** cho tác vụ chuyển đổi.
 
-Bấm biểu tượng khay để xem lại tiến trình gần nhất. Bấm phải → **Exit** để thoát Warp.
+Bấm biểu tượng khay để xem lại tiến trình gần nhất. Bấm phải để mở **Cài đặt**, xem lại **Hướng dẫn sử dụng** hoặc **Exit** để thoát.
+
+## Tùy chọn
+
+| Mục | Hành vi |
+| :--- | :--- |
+| Nơi lưu bản chuyển đổi | Mặc định **Ở thư mục cùng file gốc**: nguồn ở Desktop thì bản sao cũng ở Desktop. Có thể chọn thư mục riêng. |
+| Ngôn ngữ | Tiếng Việt hoặc English, áp dụng ngay cho hướng dẫn, Settings, khay hệ thống, vòng tròn và thông báo. |
+| Chạy cùng Windows | Bật/tắt trong bản Warp đã cài đặt; khi đăng nhập lại, app chạy nền. |
+| Thư mục cài Warp | Chọn trong bộ cài; Settings hiển thị vị trí thực tế và nút mở. |
+| File lưu tùy chọn | `%APPDATA%\Warp\settings.json`, chỉ lưu cục bộ theo tài khoản Windows. |
+
+Thay đổi được lưu ngay. Tác vụ đã xác nhận giữ nguyên thư mục đích trước đó. Warp luôn giữ bản gốc và tránh ghi đè tệp đã có, kể cả trong thư mục riêng.
 
 ## Định dạng hỗ trợ
 

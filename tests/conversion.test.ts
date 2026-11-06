@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,writeFile,readFile,rm,readdir} from 'node:fs/promises';
+import {mkdtemp,mkdir,writeFile,readFile,rm,readdir} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {targets,copyUnique,convert,findOffice} from '../electron/conversion';
@@ -24,12 +24,34 @@ test('concurrent outputs cannot overwrite the original or existing copies',async
 test('rejects unsupported conversion before launching a process',async()=>{
   await assert.rejects(convert('report.docx','xlsx','does-not-exist'),/không được hỗ trợ/);
 });
+
+test('custom destination preserves source and existing files, including concurrent copies',async()=>{
+  const dir=await mkdtemp(path.join(os.tmpdir(),'warp-custom-'));
+  try{
+    const output=path.join(dir,'chosen');await mkdir(output);
+    const original=path.join(dir,'Báo cáo.docx'),source=path.join(dir,'converted.tmp'),existing=path.join(output,'Báo cáo.pdf');
+    await writeFile(original,'ORIGINAL');await writeFile(source,'NEW');await writeFile(existing,'EXISTING');
+    const copies=await Promise.all([copyUnique(source,original,'pdf',output),copyUnique(source,original,'pdf',output)]);
+    assert.equal(new Set(copies).size,2);assert.ok(copies.every(file=>path.dirname(file)===output));
+    assert.equal(await readFile(existing,'utf8'),'EXISTING');assert.equal(await readFile(original,'utf8'),'ORIGINAL');
+    assert.ok(!(await readdir(dir)).includes('Báo cáo.pdf'));
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
 test('failed converter leaves original intact and produces no output',async()=>{
   const dir=await mkdtemp(path.join(os.tmpdir(),'warp-test-'));
   try{
     const original=path.join(dir,'original.docx');await writeFile(original,'ORIGINAL');
     await assert.rejects(convert(original,'pdf',path.join(dir,'missing.exe')));
     assert.equal(await readFile(original,'utf8'),'ORIGINAL');assert.deepEqual(await readdir(dir),['original.docx']);
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('a removed custom folder reports the destination error before starting the converter',async()=>{
+  const dir=await mkdtemp(path.join(os.tmpdir(),'warp-missing-output-'));
+  try{
+    const input=path.join(dir,'original.txt');await writeFile(input,'ORIGINAL');
+    await assert.rejects(convert(input,'pdf','unused.exe',{outputDirectory:path.join(dir,'removed')}),/thư mục lưu đã chọn/);
+    assert.equal(await readFile(input,'utf8'),'ORIGINAL');
   }finally{await rm(dir,{recursive:true,force:true});}
 });
 test('prefers the bundled engine without requiring a system installation',async()=>{
