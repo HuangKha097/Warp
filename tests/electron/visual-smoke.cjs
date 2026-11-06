@@ -2,6 +2,8 @@ const {app,BrowserWindow,ipcMain}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs/promises');
 const assert=require('node:assert/strict');
+const root=path.resolve(__dirname,'../..');
+const previews=path.join(root,'.cache/visual-smoke/previews');
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 app.whenReady().then(async()=>{
   const conversions=[],checks=[],actions=[];
@@ -10,9 +12,9 @@ app.whenReady().then(async()=>{
   const win=new BrowserWindow({width:1000,height:800,show:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
   const js=expression=>win.webContents.executeJavaScript(expression);
   const scale=index=>js(`parseFloat(document.querySelectorAll('.dock-magnifier')[${index}].style.getPropertyValue('--dock-scale'))`);
-  async function load(overlay){await win.loadFile(path.join(__dirname,'../dist/index.html'),{query:overlay?{mode:'overlay'}:{}});await delay(450);}
+  async function load(overlay){await win.loadFile(path.join(root,'dist/index.html'),{query:overlay?{mode:'overlay'}:{}});await delay(450);}
   async function drag(x,y){for(const event of [{type:'mouseDown',x:500,y:400,button:'left',clickCount:1},{type:'mouseMove',x,y,button:'left'},{type:'mouseUp',x,y,button:'left',clickCount:1}]){win.webContents.sendInputEvent(event);await delay(70);}}
-  async function snapshot(name,rect){await fs.writeFile(path.join(__dirname,`../../${name}`),(await win.webContents.capturePage(rect)).toPNG());}
+  async function snapshot(name,rect){await fs.mkdir(previews,{recursive:true});await fs.writeFile(path.join(previews,name),(await win.webContents.capturePage(rect)).toPNG());}
   async function assertClear(rect){const pixels=(await win.webContents.capturePage(rect)).toBitmap();for(let i=3;i<pixels.length;i+=4)assert.ok(pixels[i]<=2,`hole is covered: alpha ${pixels[i]}`);}
   async function desktopFixture(){await js(`(()=>{const layer=document.createElement('div');layer.id='fixture-desktop';layer.style.cssText='position:fixed;inset:0;background:#151719;pointer-events:none';layer.innerHTML='<div style="position:absolute;left:480px;top:376px;width:40px;height:48px;background:#eee;border:1px solid #bbb;border-radius:3px;display:grid;place-items:center;color:#343434;font:600 15px Segoe UI">DOC</div><div style="position:absolute;left:440px;top:431px;width:120px;text-align:center;font:11px Segoe UI;color:#eee">Project Brief.docx</div>';document.body.prepend(layer);})()`);}
   try{
@@ -47,13 +49,13 @@ app.whenReady().then(async()=>{
     assert.equal(await scale(0),1);checks.push('reduced motion disables magnification');
     await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
     await js('document.getElementById("fixture-desktop").remove()');
-    const edgeFixture={file:'Project Brief.docx',path:'fixture/Project Brief.docx',targets:['pdf','txt','odt'],busy:false,result:null,office:true,helperReady:true,message:'',anchor:{x:36,y:400},presentation:1,job:null};
+    const edgeFixture={file:'Project Brief.docx',path:'fixture/Project Brief.docx',targets:['pdf','txt','odt'],busy:false,helperReady:true,anchor:{x:36,y:400},presentation:1,job:null};
     win.webContents.send('fixture-state',edgeFixture);await delay(400);
     await assertClear({x:21,y:385,width:30,height:30});
     checks.push('edge-positioned source file remains visible through the ring');
     win.setSize(370,228);
-    await win.loadFile(path.join(__dirname,'../dist/index.html'),{query:{mode:'status'}});await delay(250);
-    const base={file:null,path:null,targets:[],busy:false,result:null,office:true,helperReady:true,message:'',presentation:0};
+    await win.loadFile(path.join(root,'dist/index.html'),{query:{mode:'status'}});await delay(250);
+    const base={file:null,path:null,targets:[],busy:false,helperReady:true,anchor:{x:0,y:0},presentation:0};
     const job={id:1,input:'fixture/Project Brief.docx',name:'Project Brief.docx',target:'pdf',status:'running',phase:'converting',startedAt:Date.now()-4200,queued:1,completed:0,failures:[]};
     const update=async next=>{win.webContents.send('fixture-state',{...base,job:next});await delay(100);};
     await update(job);
@@ -70,8 +72,8 @@ app.whenReady().then(async()=>{
     await snapshot('Warp-error-preview.png');checks.push('error reason and retry action are visible');
     assert.ok(await js(`(()=>{const r=document.querySelector('footer').getBoundingClientRect();return r.bottom<=innerHeight&&document.documentElement.scrollWidth<=innerWidth;})()`));
     assert.equal(await js('document.querySelector(".progress-brand img").naturalWidth'),256);checks.push('progress popup fits and uses the updated logo');
-    await fs.mkdir(path.join(__dirname,'../.cache'),{recursive:true});
-    await fs.writeFile(path.join(__dirname,'../.cache/visual-check.json'),JSON.stringify({passed:true,conversions,checks},null,2));
+    await fs.mkdir(path.join(root,'.cache'),{recursive:true});
+    await fs.writeFile(path.join(root,'.cache/visual-check.json'),JSON.stringify({passed:true,conversions,checks},null,2));
     console.log('PASS:',checks.join('; '));win.destroy();app.exit(0);
-  }catch(error){await fs.mkdir(path.join(__dirname,'../.cache'),{recursive:true});await fs.writeFile(path.join(__dirname,'../.cache/visual-check.json'),JSON.stringify({passed:false,error:String(error),checks}));console.error(error);win.destroy();app.exit(1);}
+  }catch(error){await fs.mkdir(path.join(root,'.cache'),{recursive:true});await fs.writeFile(path.join(root,'.cache/visual-check.json'),JSON.stringify({passed:false,error:String(error),checks}));console.error(error);win.destroy();app.exit(1);}
 });

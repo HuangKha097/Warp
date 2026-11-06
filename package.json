@@ -14,8 +14,8 @@
     "package": "npm run prepare:engine && npm run build && electron-builder --win nsis --x64",
     "prepare:engine": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-engine.ps1",
     "test:engine": "tsx --test tests/engine.integration.ts",
-    "test:visual": "electron scripts/visual-smoke.cjs",
-    "test:runtime": "electron scripts/runtime-smoke.cjs"
+    "test:visual": "electron tests/electron/visual-smoke.cjs",
+    "test:runtime": "electron tests/electron/runtime-smoke.cjs"
   },
   "dependencies": {
     "react": "^19.2.0",

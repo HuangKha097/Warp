@@ -8,7 +8,7 @@ const Module=require('node:module');
 const path=require('node:path');
 const fs=require('node:fs/promises');
 const assert=require('node:assert/strict');
-const root=path.resolve(__dirname,'..');
+const root=path.resolve(__dirname,'../..');
 const cache=path.join(root,'.cache/runtime-smoke',String(Date.now()));
 require('node:fs').mkdirSync(cache,{recursive:true});
 app.setPath('userData',path.join(cache,'profile'));app.setAppPath(root);
@@ -36,8 +36,8 @@ async function until(condition,timeout=180000){const start=Date.now();while(!awa
 async function main(){
   await until(()=>watcher&&windows.length===2,15000);
   const overlay=windows[0],status=windows[1];
-  const read=()=>overlay.window.webContents.executeJavaScript('window.orbit.state()');
-  const convert=()=>overlay.window.webContents.executeJavaScript('window.orbit.convert("pdf")');
+  const read=()=>overlay.window.webContents.executeJavaScript('window.warp.state()');
+  const convert=()=>overlay.window.webContents.executeJavaScript('window.warp.convert("pdf")');
   const checks=[];
   assert.ok(windows.every(w=>!w.visible&&w.shows===0&&w.options.skipTaskbar));
   assert.deepEqual(tray.menu.map(item=>item.label),['Exit']);checks.push('startup is tray-only with Exit');

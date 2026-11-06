@@ -5,20 +5,20 @@ import {convert,findOffice,targets} from './conversion';
 import {JobQueue,type Job} from './jobs';
 import {SelectionSession} from './selection';
 import {NativeWatcher,type WatchEvent} from './watcher';
+import type {AppState,ProgressState} from './contracts';
 
 app.setName('Warp');
 if(process.platform==='win32')app.setAppUserModelId('io.warp.converter');
 const selection=new SelectionSession();
 let overlay:BrowserWindow,statusWindow:BrowserWindow,tray:Tray,watcher:NativeWatcher;
-let quitting=false,helperReady=false,presentation=0,office:string|null=null;
-let anchor={x:260,y:260},message='Chọn một tệp rồi giữ Alt + Shift.';
-type Progress={id:number;input:string;name:string;target:string;status:Job['status'];phase:Job['phase'];startedAt:number;output?:string;error?:string;queued:number;completed:number;failures:{name:string;error:string}[]};
-let progress:Progress|null=null;
+let quitting=false,helperReady=false,presentation=0;
+let anchor={x:260,y:260};
+let progress:ProgressState|null=null;
 let dismissedId=-1,shownId=-1;
 let closeTimer:ReturnType<typeof setTimeout>|undefined;
 function enginePath(){return app.isPackaged?path.join(process.resourcesPath,'libreoffice'):path.join(app.getAppPath(),'vendor','libreoffice');}
 function diagnostic(event:string){void appendFile(path.join(app.getPath('userData'),'runtime.log'),`${new Date().toISOString()} ${event}\n`).catch(()=>{});}
-function state(){const file=selection.current?.file??null;return {file:file?path.basename(file):null,path:file,targets:file?targets(file):[],busy:queue.hasInput(file),result:progress?.output?path.basename(progress.output):null,office:!!office,helperReady,message,anchor,presentation,job:progress};}
+function state():AppState{const file=selection.current?.file??null;return {file:file?path.basename(file):null,path:file,targets:file?targets(file):[],busy:queue.hasInput(file),helperReady,anchor,presentation,job:progress};}
 function send(){if(quitting)return;for(const window of [overlay,statusWindow])if(window&&!window.isDestroyed())window.webContents.send('state',state());}
 function showProgress(force=false){
   if(quitting||!progress||statusWindow.isDestroyed())return;
@@ -45,12 +45,11 @@ function jobChanged(job:Job){
   }
 }
 const queue=new JobQueue(async(input,target,onProgress,signal)=>{
-  office=await findOffice(enginePath());
+  const office=await findOffice(enginePath());
   if(!office)throw new Error('Thiếu bộ chuyển đổi tích hợp. Hãy cài lại bản Warp đầy đủ.');
   return convert(input,target,office,{progress:onProgress,signal});
 },jobChanged);
 function warning(error:string){
-  message=error;send();
   if(queue.jobs.some(j=>j.status==='running'))return;
   progress={id:0,input:'',name:'Không thể mở vòng tròn',target:'',status:'error',phase:'preparing',startedAt:0,error,queued:0,completed:0,failures:[]};
   dismissedId=-1;send();showProgress(true);
@@ -68,7 +67,7 @@ async function handleWatch(event:WatchEvent){
   const point=screen.screenToDipPoint({x:event.x!,y:event.y!});
   const display=screen.getDisplayNearestPoint(point);
   anchor={x:point.x-display.bounds.x,y:point.y-display.bounds.y};
-  overlay.setBounds(display.bounds);presentation++;message='Kéo tệp sang định dạng bạn muốn.';
+  overlay.setBounds(display.bounds);presentation++;
   send();overlay.showInactive();diagnostic(`orbit-shown ${presentation}`);
 }
 function exit(){quitting=true;clearTimeout(closeTimer);selection.release();watcher?.stop();queue.dispose();app.quit();}
@@ -84,7 +83,6 @@ else{
   // Launching a second copy must never open a companion/menu window.
   app.on('second-instance',()=>{});
   app.whenReady().then(async()=>{
-    office=await findOffice(enginePath());
     const preferences={preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true};
     overlay=new BrowserWindow({width:520,height:520,transparent:true,frame:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,show:false,hasShadow:false,focusable:false,backgroundColor:'#00000000',webPreferences:preferences});
     statusWindow=new BrowserWindow({width:370,height:228,frame:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,focusable:false,backgroundColor:'#1c1c1e',webPreferences:preferences});
@@ -108,7 +106,6 @@ else{
     ipcMain.handle('reveal',event=>{trusted(event);if(progress?.output)shell.showItemInFolder(progress.output);});
     ipcMain.handle('retry',event=>{trusted(event);const failed=queue.failures.at(-1);if(failed)queue.enqueue(failed.input,failed.target);return state();});
     ipcMain.handle('hide',event=>{trusted(event);if(event.sender===statusWindow.webContents){dismissedId=progress?.id??-1;clearTimeout(closeTimer);}else selection.release();BrowserWindow.fromWebContents(event.sender)?.hide();});
-    ipcMain.handle('quit',event=>{trusted(event);exit();});
     await overlay.loadFile(path.join(__dirname,'../dist/index.html'),{query:{mode:'overlay'}});
     await statusWindow.loadFile(path.join(__dirname,'../dist/index.html'),{query:{mode:'status'}});
     watcher=new NativeWatcher(app.isPackaged?path.join(process.resourcesPath,'SelectionWatcher.exe'):path.join(app.getAppPath(),'native','SelectionWatcher.exe'));

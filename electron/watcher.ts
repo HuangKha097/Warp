@@ -12,7 +12,7 @@ export class NativeWatcher extends EventEmitter {
   private lastSeen=0;
   private captureAt=0;
   private captureGeneration=0;
-  constructor(private readonly executable:string,private readonly launch:()=>ChildProcess=()=>spawn(executable,[String(process.pid)],{windowsHide:true,stdio:['ignore','pipe','pipe']})){super();}
+  constructor(executable:string,private readonly launch:()=>ChildProcess=()=>spawn(executable,[String(process.pid)],{windowsHide:true,stdio:['ignore','pipe','pipe']})){super();}
   start(){
     if(this.stopped||this.child)return;
     const epoch=++this.epoch;

@@ -11,7 +11,7 @@ test('only offers compatible targets, case insensitive',()=>{
   assert.ok(!targets('report.docx').includes('xlsx'));
 });
 test('concurrent outputs cannot overwrite the original or existing copies',async()=>{
-  const dir=await mkdtemp(path.join(os.tmpdir(),'orbit-test-'));
+  const dir=await mkdtemp(path.join(os.tmpdir(),'warp-test-'));
   try{
     const original=path.join(dir,'Báo cáo.docx'),existing=path.join(dir,'Báo cáo.pdf'),source=path.join(dir,'converted.tmp');
     await writeFile(original,'ORIGINAL');await writeFile(existing,'EXISTING');await writeFile(source,'PDF');
@@ -25,7 +25,7 @@ test('rejects unsupported conversion before launching a process',async()=>{
   await assert.rejects(convert('report.docx','xlsx','does-not-exist'),/không được hỗ trợ/);
 });
 test('failed converter leaves original intact and produces no output',async()=>{
-  const dir=await mkdtemp(path.join(os.tmpdir(),'orbit-test-'));
+  const dir=await mkdtemp(path.join(os.tmpdir(),'warp-test-'));
   try{
     const original=path.join(dir,'original.docx');await writeFile(original,'ORIGINAL');
     await assert.rejects(convert(original,'pdf',path.join(dir,'missing.exe')));
