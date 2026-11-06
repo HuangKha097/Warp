@@ -9,7 +9,7 @@ export default function ProgressCard({job,onHide,onReveal,onRetry}:{job:Progress
   if(!job)return null;
   const failed=job.status==='error',done=job.status==='success';
   const stages={preparing:'Đang chuẩn bị tệp…',converting:'Đang chuyển đổi…',saving:'Đang lưu bản sao…'};
-  const title=failed?'Chuyển đổi chưa thành công':done?'Đã tạo bản chuyển đổi':job.status==='queued'?'Đang chờ chuyển đổi':stages[job.phase];
+  const title=failed?(job.target?'Chuyển đổi chưa thành công':'Không đọc được tệp đang chọn'):done?'Đã tạo bản chuyển đổi':job.status==='queued'?'Đang chờ chuyển đổi':stages[job.phase];
   const seconds=Math.max(0,Math.floor((now-job.startedAt)/1000));
   const elapsed=seconds<60?`${seconds} giây`:`${Math.floor(seconds/60)} phút ${seconds%60} giây`;
   const queueText=job.queued?`${job.queued} tệp đang chờ`:job.completed>1?`Đã xong ${job.completed} tệp`:'File gốc được giữ nguyên';

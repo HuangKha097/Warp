@@ -18,6 +18,7 @@ jobs:
       - run: node node_modules/electron/install.js
       - run: npm run check
       - run: npm test
+      - run: npm run test:native
       - run: npm run prepare:engine
       - run: npm run test:engine
       - run: npm run build

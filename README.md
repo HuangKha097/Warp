@@ -4,9 +4,9 @@
 
 Chuyển đổi tài liệu ngay trên Desktop và File Explorer: chọn tệp, giữ **Alt + Shift**, kéo sang định dạng cần dùng. Warp tạo bản sao cạnh tệp gốc.
 
-**Windows x64 · Bản thử nghiệm 0.4.2**
+**Windows x64 · Bản thử nghiệm 0.4.3**
 
-[Tải bộ cài Windows](https://github.com/HuangKha097/Warp/releases/tag/v0.4.2) · [Báo lỗi](https://github.com/HuangKha097/Warp/issues) · [Kiểm thử](docs/testing.md)
+[Tải bộ cài Windows](https://github.com/HuangKha097/Warp/releases/tag/v0.4.3) · [Báo lỗi](https://github.com/HuangKha097/Warp/issues) · [Kiểm thử](docs/testing.md)
 
 ![Vòng tròn chuyển đổi Warp với phần tâm để lộ tệp gốc](docs/assets/radial-menu.png)
 
@@ -14,7 +14,7 @@ Chuyển đổi tài liệu ngay trên Desktop và File Explorer: chọn tệp, 
 
 ## Cài đặt và sử dụng
 
-1. Tải và chạy **Warp-Setup-0.4.2.exe**. Nếu đang dùng Warp, bấm phải biểu tượng khay hệ thống → **Exit** trước khi cập nhật.
+1. Tải và chạy **Warp-Setup-0.4.3.exe**. Nếu đang dùng Warp, bấm phải biểu tượng khay hệ thống → **Exit** trước khi cập nhật.
 2. Warp chạy trong **khay hệ thống cạnh đồng hồ** và được đăng ký chạy khi đăng nhập Windows. Kiểm tra mục biểu tượng ẩn `^` nếu chưa thấy logo.
 3. Bấm một lần chọn tệp trên Desktop hoặc trong Explorer, sau đó **giữ Alt + Shift**. Vòng tròn hiện quanh vị trí tệp; phần tâm trong suốt để nhìn thấy tệp gốc.
 4. Vẫn giữ hai phím, nhấn giữ chuột tại tệp, kéo sang một múi định dạng đang bật rồi thả chuột để xác nhận. Nhả Alt hoặc Shift trước khi xác nhận sẽ hủy thao tác.
@@ -26,6 +26,7 @@ Bộ cài đã chứa bộ chuyển đổi. Người dùng **không cần cài L
 
 - Không có cửa sổ menu khi mở ứng dụng. Bấm biểu tượng khay để xem lại trạng thái chuyển đổi gần nhất; bấm phải → **Exit** để thoát.
 - Có thể chọn tệp khác và gọi vòng tròn trong lúc tác vụ trước đang chạy. Các yêu cầu được xếp hàng và xử lý lần lượt.
+- Tệp được nhận diện bằng đường dẫn của mục đang chọn trong Windows Shell, nên các file cùng tên gốc nhưng khác đuôi (ví dụ DOCX và PDF vừa chuyển đổi) vẫn được phân biệt khi Windows ẩn phần mở rộng.
 - Thanh loading cho biết đang chuẩn bị, chuyển đổi hoặc lưu; không hiển thị phần trăm ước lượng. Thành công có **Mở thư mục**, lỗi có lý do và **Thử lại**.
 - Bấm `×` để ẩn bảng tiến trình. Tác vụ đã xác nhận vẫn tiếp tục chạy nền.
 - Khi tệp sát mép/góc màn hình, vòng tròn dịch vào vùng làm việc, tránh taskbar và giữ nguyên các múi. Nếu không đủ chỗ, vòng tròn cùng icon/nhãn thu nhỏ theo. Có thể bắt đầu kéo từ vị trí tệp gốc hoặc tâm vòng tròn.
@@ -88,6 +89,7 @@ Các lệnh chính:
 | `npm start` | Build và chạy Warp trong khay hệ thống |
 | `npm run check` | Kiểm tra TypeScript và mã không còn dùng |
 | `npm test` | Kiểm tra hàng đợi, giữ/nhả phím, vùng thả và bảo toàn tệp |
+| `npm run test:native` | Kiểm tra đọc lựa chọn Desktop với tên trùng sau chuyển đổi |
 | `npm run test:engine` | Chuyển đổi bằng bộ chuyển đổi đi kèm thật |
 | `npm run build` | Build renderer, Electron và helper C# |
 | `npm run test:visual` | Kiểm tra renderer sau khi build |

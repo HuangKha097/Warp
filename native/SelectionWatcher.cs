@@ -66,16 +66,14 @@ class SelectionWatcher {
         }
         Error("Không lấy được file từ cửa sổ Explorer này. Hãy chọn lại tệp rồi thử lại.",gesture);return;
       }
-      // Desktop labels can omit extensions. Resolve only an unambiguous real file.
-      string desktopLabel=selectedNodes[0].Current.Name;
-      var matches=new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-      foreach(string dir in new[]{Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory)}){
-        if(!Directory.Exists(dir))continue;
-        foreach(string file in Directory.GetFiles(dir)) if(String.Equals(Path.GetFileName(file),desktopLabel,StringComparison.OrdinalIgnoreCase)||String.Equals(Path.GetFileNameWithoutExtension(file),desktopLabel,StringComparison.OrdinalIgnoreCase))matches.Add(file);
-      }
-      if(matches.Count!=1){Error("Không xác định được file Desktop. Hãy mở thư mục Desktop trong Explorer rồi chọn lại tệp.",gesture);return;}
-      foreach(string file in matches)Emit(file,selectedNodes[0],gesture);
-    }catch{Error("Không đọc được lựa chọn. Hãy chọn lại tệp rồi giữ Alt + Shift.",gesture);}
+      string desktopFile=DesktopSelection.Read();
+      // UI Automation supplies geometry only. Recheck the element after the
+      // Shell query so a changed selection cannot anchor the file to an old icon.
+      object selectionPattern;
+      if(!selectedNodes[0].TryGetCurrentPattern(SelectionItemPattern.Pattern,out selectionPattern)||!((SelectionItemPattern)selectionPattern).Current.IsSelected){Error("Lựa chọn đã thay đổi. Hãy giữ lại Alt + Shift.",gesture);return;}
+      Emit(desktopFile,selectedNodes[0],gesture);
+    }catch(DesktopSelectionException error){Error(error.Message,gesture);}
+    catch{Error("Không đọc được lựa chọn. Hãy chọn lại tệp rồi giữ Alt + Shift.",gesture);}
     finally{Release(windowsObject);Release(shellObject);}
   }
   [STAThread] static void Main(string[] args){

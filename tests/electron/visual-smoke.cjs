@@ -99,6 +99,10 @@ app.whenReady().then(async()=>{
     assert.ok(await js('document.querySelector(".progress-error").textContent.includes("quyền")'));
     await js('document.querySelector(".progress-footer button").click()');await delay(30);assert.ok(actions.includes('retry'));
     await snapshot('Warp-error-preview.png');checks.push('error reason and retry action are visible');
+    await update({...job,id:0,input:'',name:'Không thể mở vòng tròn',target:'',status:'error',queued:0,error:'Vui lòng chọn đúng một file trên Desktop.',failures:[]});
+    assert.ok(await js('document.querySelector(".progress-heading").textContent.includes("Không đọc được tệp đang chọn")'));
+    assert.equal(await js('document.querySelectorAll(".progress-footer button").length'),0);
+    checks.push('selection lookup errors are identified separately from conversion errors');
     assert.ok(await js(`(()=>{const r=document.querySelector('footer').getBoundingClientRect();return r.bottom<=innerHeight&&document.documentElement.scrollWidth<=innerWidth;})()`));
     assert.equal(await js('document.querySelector(".progress-brand img").naturalWidth'),256);checks.push('progress popup fits and uses the updated logo');
     await fs.mkdir(path.join(root,'.cache'),{recursive:true});
