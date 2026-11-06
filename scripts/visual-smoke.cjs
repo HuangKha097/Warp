@@ -15,6 +15,12 @@ app.whenReady().then(async()=>{
   async function snapshot(name,rect){await fs.writeFile(path.join(__dirname,`../../${name}`),(await win.webContents.capturePage(rect)).toPNG());}
   try{
     await load(true);
+    // Hosted Windows runners often disable UI animations globally. Exercise both
+    // preference modes deliberately instead of inheriting the host's setting.
+    win.webContents.debugger.attach('1.3');
+    await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+    await delay(50);
+    assert.equal(await js('matchMedia("(prefers-reduced-motion: reduce)").matches'),false);
     assert.equal(await js('document.querySelectorAll(".radial-sector").length'),6);
     checks.push('six contiguous annular slices');
     await snapshot('Warp-preview.png',{x:270,y:170,width:460,height:460});
@@ -28,12 +34,10 @@ app.whenReady().then(async()=>{
     assert.equal(await scale(0),1);checks.push('spring settles to rest after leaving');
     await drag(500,230);await delay(100);assert.deepEqual(conversions,['pdf']);checks.push('drag to PDF submits once');
     await drag(648,315);assert.deepEqual(conversions,['pdf']);checks.push('disabled Word slice rejects drop');
-    win.webContents.debugger.attach('1.3');
     await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
     win.webContents.sendInputEvent({type:'mouseMove',x:500,y:239});await delay(200);
     assert.equal(await scale(0),1);checks.push('reduced motion disables magnification');
-    await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[]});
-    win.webContents.debugger.detach();
+    await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
     win.setSize(370,228);
     await win.loadFile(path.join(__dirname,'../dist/index.html'),{query:{mode:'status'}});await delay(250);
     const base={file:null,path:null,targets:[],busy:false,result:null,office:true,helperReady:true,message:'',presentation:0};
