@@ -14,3 +14,9 @@ The engine is distributed under its upstream open-source licenses, including MPL
 Recipients can obtain the corresponding upstream source from the source link above. Redistributors must retain this notice and all engine license files and keep the corresponding source available under its original terms.
 
 The application logo was supplied by the user; Warp's MIT code license does not grant additional rights to that artwork.
+
+## Documentation diagrams
+
+The interactive architecture viewer and its SVG export in `docs/` were generated with [Archify 3.2.0](https://github.com/tt-a1i/archify), distributed under Apache-2.0. Copyright (c) 2026 tt-a1i (Archify); copyright (c) 2025 Cocoon AI. The generated HTML and SVG retain their embedded software notices and license texts.
+
+These documentation artifacts embed JetBrains Mono, copyright 2020 The JetBrains Mono Project Authors, under the SIL Open Font License 1.1. Its notice and license text remain embedded in the artifacts. Archify is used to author documentation and is not a runtime dependency of the Warp application.

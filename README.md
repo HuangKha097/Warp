@@ -64,6 +64,8 @@ Giới hạn hiện tại:
 
 [Sơ đồ HTML tương tác](docs/architecture.html) · [Nguồn Archify](docs/architecture.json). Tải HTML về và mở bằng trình duyệt để xem chi tiết và liên kết tới code.
 
+Nội dung sơ đồ bằng tiếng Việt; một số điều khiển nâng cao của trình xem dùng tiếng Anh.
+
 Helper C# quan sát Alt + Shift và đọc tệp đang chọn bằng Shell COM/UI Automation. Electron kiểm tra yêu cầu IPC, quản lý vòng tròn và hàng đợi. Mỗi tác vụ chuyển đổi chạy trên một bản sao tạm với profile riêng; kết quả được chép sang tên mới bằng thao tác không ghi đè. Trạng thái hàng đợi nằm trong bộ nhớ, không khôi phục sau khi thoát ứng dụng. Không có backend server hay database.
 
 ## Phát triển
