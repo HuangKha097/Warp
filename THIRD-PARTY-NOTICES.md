@@ -17,6 +17,6 @@ The application logo was supplied by the user; Warp's MIT code license does not 
 
 ## Documentation diagrams
 
-The interactive architecture viewer and its SVG export in `docs/` were generated with [Archify 3.2.0](https://github.com/tt-a1i/archify), distributed under Apache-2.0. Copyright (c) 2026 tt-a1i (Archify); copyright (c) 2025 Cocoon AI. The generated HTML and SVG retain their embedded software notices and license texts.
+The architecture SVG in `docs/assets/` was generated with [Archify 3.2.0](https://github.com/tt-a1i/archify), distributed under Apache-2.0. Copyright (c) 2026 tt-a1i (Archify); copyright (c) 2025 Cocoon AI. The generated SVG retains its embedded software notices and license texts.
 
 These documentation artifacts embed JetBrains Mono, copyright 2020 The JetBrains Mono Project Authors, under the SIL Open Font License 1.1. Its notice and license text remain embedded in the artifacts. Archify is used to author documentation and is not a runtime dependency of the Warp application.

@@ -41,6 +41,8 @@ async function main(){
   const checks=[];
   assert.ok(windows.every(w=>!w.visible&&w.shows===0&&w.options.skipTaskbar));
   assert.ok(windows.every(w=>w.options.thickFrame===false&&w.options.hasShadow===false));
+  assert.equal(status.options.transparent,true);
+  assert.equal(status.options.backgroundColor,'#00000000');
   assert.deepEqual(tray.menu.map(item=>item.label),['Exit']);checks.push('startup is tray-only with Exit');
   const a=path.join(cache,'first.txt'),b=path.join(cache,'second.txt'),gone=path.join(cache,'retry.txt');
   await fs.writeFile(a,'Warp first document.');await fs.writeFile(b,'Warp second document.');

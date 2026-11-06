@@ -86,7 +86,7 @@ else{
   app.whenReady().then(async()=>{
     const preferences={preload:path.join(__dirname,'preload.js'),contextIsolation:true,nodeIntegration:false,sandbox:true};
     overlay=new BrowserWindow({width:520,height:520,transparent:true,frame:false,thickFrame:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,show:false,hasShadow:false,focusable:false,backgroundColor:'#00000000',webPreferences:preferences});
-    statusWindow=new BrowserWindow({width:370,height:228,frame:false,thickFrame:false,hasShadow:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,focusable:false,backgroundColor:'#1c1c1e',webPreferences:preferences});
+    statusWindow=new BrowserWindow({width:370,height:228,transparent:true,frame:false,thickFrame:false,hasShadow:false,resizable:false,alwaysOnTop:true,skipTaskbar:true,show:false,focusable:false,backgroundColor:'#00000000',webPreferences:preferences});
     configure(overlay);configure(statusWindow);
     tray=new Tray(nativeImage.createFromPath(path.join(app.getAppPath(),'assets','warp.ico')));
     tray.setToolTip('Warp · Alt + Shift');

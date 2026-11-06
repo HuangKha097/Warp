@@ -9,11 +9,15 @@ app.whenReady().then(async()=>{
   const conversions=[],checks=[],actions=[];
   ipcMain.handle('fixture-convert',(_,format)=>{conversions.push(format);});
   ipcMain.handle('fixture-action',(_,action)=>{actions.push(action);});
-  const win=new BrowserWindow({width:1000,height:800,show:false,frame:false,thickFrame:false,hasShadow:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+  const win=new BrowserWindow({width:1000,height:800,show:false,focusable:false,frame:false,thickFrame:false,hasShadow:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
   const js=expression=>win.webContents.executeJavaScript(expression);
   const scale=index=>js(`parseFloat(document.querySelectorAll('.dock-magnifier')[${index}].style.getPropertyValue('--dock-scale'))`);
   async function load(overlay){await win.loadFile(path.join(root,'dist/index.html'),{query:overlay?{mode:'overlay'}:{}});await delay(450);}
   async function drag(x,y,from={x:500,y:400}){for(const event of [{type:'mouseDown',...from,button:'left',clickCount:1},{type:'mouseMove',x,y,button:'left'},{type:'mouseUp',x,y,button:'left',clickCount:1}]){win.webContents.sendInputEvent(event);await delay(70);}}
+  async function click(selector){
+    const point=await js(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return {x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
+    for(const type of ['mouseMove','mouseDown','mouseUp']){win.webContents.sendInputEvent({type,...point,button:'left',clickCount:1});await delay(30);}
+  }
   async function snapshot(name,rect){await fs.mkdir(previews,{recursive:true});await fs.writeFile(path.join(previews,name),(await win.webContents.capturePage(rect)).toPNG());}
   async function assertClear(rect){const pixels=(await win.webContents.capturePage(rect)).toBitmap();for(let i=3;i<pixels.length;i+=4)assert.ok(pixels[i]<=2,`hole is covered: alpha ${pixels[i]}`);}
   async function desktopFixture(anchor={x:500,y:400}){await js(`(()=>{const layer=document.createElement('div');layer.id='fixture-desktop';layer.style.cssText='position:fixed;inset:0;background:#151719;pointer-events:none';layer.innerHTML='<div style="position:absolute;left:${anchor.x-20}px;top:${anchor.y-24}px;width:40px;height:48px;background:#eee;border:1px solid #bbb;border-radius:3px;display:grid;place-items:center;color:#343434;font:600 15px Segoe UI">DOC</div><div style="position:absolute;left:${Math.max(4,anchor.x-60)}px;top:${anchor.y+31}px;width:120px;text-align:center;font:11px Segoe UI;color:#eee">Project Brief.docx</div>';document.body.prepend(layer);})()`);}
@@ -87,21 +91,36 @@ app.whenReady().then(async()=>{
     const base={file:null,path:null,targets:[],busy:false,helperReady:true,anchor:{x:0,y:0},presentation:0};
     const job={id:1,input:'fixture/Project Brief.docx',name:'Project Brief.docx',target:'pdf',status:'running',phase:'converting',startedAt:Date.now()-4200,queued:1,completed:0,failures:[]};
     const update=async next=>{win.webContents.send('fixture-state',{...base,job:next});await delay(100);};
+    async function assertPopupCorners(){
+      for(const [x,y] of [[0,0],[368,0],[0,226],[368,226]])await assertClear({x,y,width:2,height:2});
+      assert.deepEqual(await js(`(()=>{const s=getComputedStyle(document.querySelector('.progress-card'));return [s.boxShadow,s.filter];})()`),['none','none']);
+    }
     await update(job);
+    await assertPopupCorners();
+    assert.equal(await js('document.querySelectorAll(".progress-card img").length'),1,'only the brand logo should be an image');
+    assert.equal(await js('document.querySelectorAll(".progress-card canvas").length'),0);
+    const elapsedBefore=await js('document.querySelector(".progress-footer>span").textContent');
+    await delay(1100);
+    assert.notEqual(await js('document.querySelector(".progress-footer>span").textContent'),elapsedBefore);
+    checks.push('notification is live React DOM with an updating elapsed timer, transparent rounded corners and no shadow');
     assert.equal(await js('document.querySelectorAll("[role=progressbar]").length'),1);
     assert.equal(await js('document.querySelector("[role=progressbar]").hasAttribute("aria-valuenow")'),false);
     await snapshot('Warp-progress-preview.png');checks.push('running progress is visible and indeterminate rather than a fabricated percentage');
     await update({...job,status:'success',output:'fixture/Project Brief.pdf',queued:0,completed:1});
+    await assertPopupCorners();
     assert.equal(await js('document.querySelector("[role=progressbar]").getAttribute("aria-valuenow")'),'100');
-    await js('document.querySelector(".progress-footer button").click()');await delay(30);assert.ok(actions.includes('reveal'));
+    await click('.progress-footer button');assert.ok(actions.includes('reveal'));
     await snapshot('Warp-success-preview.png');checks.push('success reveals the converted file folder');
     await update({...job,status:'error',queued:0,error:'Không có quyền ghi bản chuyển đổi vào thư mục này.',failures:[{name:job.name,error:'Không có quyền ghi bản chuyển đổi vào thư mục này.'}]});
+    await assertPopupCorners();
     assert.ok(await js('document.querySelector(".progress-error").textContent.includes("quyền")'));
-    await js('document.querySelector(".progress-footer button").click()');await delay(30);assert.ok(actions.includes('retry'));
+    await click('.progress-footer button');assert.ok(actions.includes('retry'));
     await snapshot('Warp-error-preview.png');checks.push('error reason and retry action are visible');
     await update({...job,id:0,input:'',name:'Không thể mở vòng tròn',target:'',status:'error',queued:0,error:'Vui lòng chọn đúng một file trên Desktop.',failures:[]});
+    await assertPopupCorners();
     assert.ok(await js('document.querySelector(".progress-heading").textContent.includes("Không đọc được tệp đang chọn")'));
     assert.equal(await js('document.querySelectorAll(".progress-footer button").length'),0);
+    await click('.progress-close');assert.ok(actions.includes('hide'));
     checks.push('selection lookup errors are identified separately from conversion errors');
     assert.ok(await js(`(()=>{const r=document.querySelector('footer').getBoundingClientRect();return r.bottom<=innerHeight&&document.documentElement.scrollWidth<=innerWidth;})()`));
     assert.equal(await js('document.querySelector(".progress-brand img").naturalWidth'),256);checks.push('progress popup fits and uses the updated logo');

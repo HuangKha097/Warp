@@ -45,8 +45,4 @@ Các biên nhận nằm trong `.cache/engine-check.json`, `.cache/visual-check.j
 - Cài/gỡ trên Windows sạch, đăng nhập lại để kiểm tra tự khởi động và mục HKCU Run; macro installer được kiểm tra khi đóng gói, chưa được nghiệm thu bằng reboot máy sạch.
 - Tài liệu phức tạp, font thiếu, bảng biểu và bản trình chiếu thực tế. Không suy ra độ chính xác mọi tài liệu từ fixture nhỏ.
 
-## Tài liệu kiến trúc
-
-`architecture.json` là nguồn Archify; `architecture.html` là bản xem tương tác, còn `assets/architecture.svg` là hình tĩnh cho README. Sơ đồ dẫn tới code ở revision đã ghim trong `meta.repository`, thay vì dẫn tới dòng có thể thay đổi trên `main`.
-
-Khi thay đổi kiến trúc, cập nhật các trích dẫn và chạy lại Archify `finalize architecture` với `--repo-root` và `--quality showcase` trước khi xuất SVG. Biên nhận Archify và candidate làm việc được giữ trong `.archify/`; không commit đường dẫn tuyệt đối hoặc biên nhận riêng của máy vào tài liệu công khai.
+Hộp thông báo được kiểm tra như giao diện React thật: thời gian tăng khi chạy, nội dung thay đổi theo tác vụ, nút Mở thư mục/Thử lại gọi hành động tương ứng. Các góc bo của cửa sổ được kiểm tra pixel trong suốt ở cả trạng thái đang chạy, thành công, lỗi chuyển đổi và lỗi đọc lựa chọn. Ảnh trong `.cache/` chỉ là đầu ra kiểm tra.
