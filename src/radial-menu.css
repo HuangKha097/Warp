@@ -7,7 +7,6 @@
 .radial-sector.is-active>path,.radial-sector:focus-visible>path{fill:#363638;stroke:#ffffff35;stroke-width:1}
 .radial-sector:focus-visible>path{stroke:#ffffffbb;stroke-width:1.5}
 .radial-sector.is-disabled{cursor:default}.radial-sector.is-disabled>path{fill:#202021;stroke:#ffffff09}
-.radial-core{fill:#1d1d1e;stroke:#ffffff24;stroke-width:1}
 .dock-slot{position:absolute;width:0;height:0;pointer-events:none;text-align:center}
 .dock-magnifier{position:absolute;left:-24px;top:-24px;width:48px;height:48px;transform:translateY(var(--dock-lift,0px)) scale(var(--dock-scale,1));transform-origin:center;will-change:transform}
 .dock-face{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(180deg,#3b3b3d,#2b2b2d);border:1px solid #ffffff12;box-shadow:inset 0 1px 0 #ffffff09,0 4px 9px #0003;color:#e4e4e7}
@@ -16,10 +15,10 @@
 .dock-status{position:absolute;top:51px;left:0;transform:translateX(-50%);font-size:9px;white-space:nowrap;color:#8e8e94;line-height:1.25}
 .dock-slot.is-active .dock-caption{color:#fff}.dock-slot.is-active .dock-face{border-color:#ffffff30;color:#fff}
 .dock-slot.is-disabled .dock-face{color:#b0b0b6;background:#29292b;box-shadow:none;opacity:.38}.dock-slot.is-disabled .dock-caption{color:#727277}.dock-slot.is-disabled .dock-status{color:#646469}
-.radial-file{position:absolute;transform:translate(-50%,-50%);border:0;background:transparent;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:15px;cursor:grab;touch-action:none}
-.radial-file .document-glyph{width:31px;height:38px;color:#bcbcc2}.radial-file strong{font-size:11px;font-weight:550;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:12px;color:#ededee}
-.radial-file>span{font-size:9px;color:#8e8e94;margin-top:5px;white-space:nowrap}.radial-file:active{cursor:grabbing}.radial-file:disabled{cursor:wait;opacity:.6}.core-logo{width:42px;height:42px;object-fit:contain;border-radius:9px}
-.selection-tether{position:absolute;inset:0;pointer-events:none}.selection-tether line{stroke:#bcbcc2;stroke-width:1;stroke-dasharray:3 5;opacity:.5}.shifted-anchor{position:absolute;transform:translate(-50%,-50%);width:66px;height:66px;border-radius:50%;border:1px dashed #ffffff70;background:#ffffff08;cursor:grab;touch-action:none}
+/* A single alpha step keeps Windows layered-window hit testing on the drag handle.
+   It is visually empty: no icon, text, border or visible panel is drawn here. */
+.radial-origin{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;outline:none;background:rgba(0,0,0,.004);border-radius:50%;cursor:grab;touch-action:none}
+.radial-origin:active{cursor:grabbing}.radial-origin:disabled{cursor:default}.radial-origin:focus-visible{outline:1px dashed #ffffff44;outline-offset:-2px}
 .file-ghost{position:absolute;transform:translate(-50%,-50%);pointer-events:none;z-index:5;padding:7px 9px;border-radius:10px;background:#28282aeb;border:1px solid #ffffff30;box-shadow:0 5px 12px #0005;color:#f4f4f5}.file-ghost[hidden]{display:none}
 .is-busy .radial-sector{pointer-events:none}.is-busy .dock-slot{opacity:.45}
 @media(prefers-reduced-motion:reduce){.dock-magnifier{transform:none!important;will-change:auto}.radial-sector>path{transition:none}}

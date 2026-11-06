@@ -1,6 +1,13 @@
-# Kiểm tra Warp 0.4.0
+# Kiểm tra Warp 0.4.1
 
-## Đã đạt
+## Kiểm tra thay đổi ở 0.4.1
+
+- TypeScript và build React/Electron/helper C# đạt.
+- Renderer Electron thật xác nhận tâm không còn icon, nhãn hay nền vẽ lại; bitmap của vùng tâm có alpha tối đa 2/255 (vùng nhận kéo gần như trong suốt). Khi vòng tròn dịch vào trong ở mép màn hình, vị trí tệp gốc cũng được để trống.
+- Kéo từ vùng tâm sang PDF vẫn gửi đúng một yêu cầu; múi không phù hợp bị chặn. Hover, hồi spring, reduced motion và các trạng thái bảng tiến trình đều đạt kiểm tra renderer.
+- Ảnh minh họa dùng nền Desktop giả lập trong bộ kiểm tra, không phải ảnh nghiệm thu Desktop thật. Thay đổi chỉ ở giao diện và vùng nhận kéo; các kiểm tra hàng đợi/bộ chuyển đổi bên dưới đã chạy ở 0.4.0.
+
+## Đã đạt ở 0.4.0
 
 - TypeScript, React/Electron build và helper C# Windows đã biên dịch thành công.
 - 18 unit test: bảo toàn file và tên trùng; engine tích hợp; spring; trạng thái giữ/nhả phím; vùng thả; tách file đang chọn khỏi tác vụ đang chạy; xếp hàng tệp kế tiếp; phục hồi sau lỗi và retry; chặn yêu cầu trùng; Exit hủy tác vụ; kết quả chọn file đến trễ; helper chết được tự khởi động lại.

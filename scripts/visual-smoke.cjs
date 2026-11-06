@@ -7,12 +7,14 @@ app.whenReady().then(async()=>{
   const conversions=[],checks=[],actions=[];
   ipcMain.handle('fixture-convert',(_,format)=>{conversions.push(format);});
   ipcMain.handle('fixture-action',(_,action)=>{actions.push(action);});
-  const win=new BrowserWindow({width:1000,height:800,show:false,backgroundColor:'#141414',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+  const win=new BrowserWindow({width:1000,height:800,show:false,transparent:true,backgroundColor:'#00000000',webPreferences:{offscreen:true,backgroundThrottling:false,preload:path.join(__dirname,'fixture-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
   const js=expression=>win.webContents.executeJavaScript(expression);
   const scale=index=>js(`parseFloat(document.querySelectorAll('.dock-magnifier')[${index}].style.getPropertyValue('--dock-scale'))`);
   async function load(overlay){await win.loadFile(path.join(__dirname,'../dist/index.html'),{query:overlay?{mode:'overlay'}:{}});await delay(450);}
   async function drag(x,y){for(const event of [{type:'mouseDown',x:500,y:400,button:'left',clickCount:1},{type:'mouseMove',x,y,button:'left'},{type:'mouseUp',x,y,button:'left',clickCount:1}]){win.webContents.sendInputEvent(event);await delay(70);}}
   async function snapshot(name,rect){await fs.writeFile(path.join(__dirname,`../../${name}`),(await win.webContents.capturePage(rect)).toPNG());}
+  async function assertClear(rect){const pixels=(await win.webContents.capturePage(rect)).toBitmap();for(let i=3;i<pixels.length;i+=4)assert.ok(pixels[i]<=2,`hole is covered: alpha ${pixels[i]}`);}
+  async function desktopFixture(){await js(`(()=>{const layer=document.createElement('div');layer.id='fixture-desktop';layer.style.cssText='position:fixed;inset:0;background:#151719;pointer-events:none';layer.innerHTML='<div style="position:absolute;left:480px;top:376px;width:40px;height:48px;background:#eee;border:1px solid #bbb;border-radius:3px;display:grid;place-items:center;color:#343434;font:600 15px Segoe UI">DOC</div><div style="position:absolute;left:440px;top:431px;width:120px;text-align:center;font:11px Segoe UI;color:#eee">Project Brief.docx</div>';document.body.prepend(layer);})()`);}
   try{
     await load(true);
     // Hosted Windows runners often disable UI animations globally. Exercise both
@@ -23,6 +25,12 @@ app.whenReady().then(async()=>{
     assert.equal(await js('matchMedia("(prefers-reduced-motion: reduce)").matches'),false);
     assert.equal(await js('document.querySelectorAll(".radial-sector").length'),6);
     checks.push('six contiguous annular slices');
+    assert.equal(await js('document.querySelectorAll(".radial-core,.radial-file,.core-logo").length'),0);
+    assert.equal(await js('document.querySelector(".radial-origin").childElementCount'),0);
+    await assertClear({x:465,y:365,width:70,height:70});
+    checks.push('center has no duplicated file/icon/text; native drag area stays visually transparent');
+    await desktopFixture();
+    await delay(100);
     await snapshot('Warp-preview.png',{x:270,y:170,width:460,height:460});
     win.webContents.sendInputEvent({type:'mouseMove',x:500,y:239});await delay(600);
     const magnified=await scale(0);assert.ok(magnified>1.18,`PDF should magnify: ${magnified}`);
@@ -38,6 +46,11 @@ app.whenReady().then(async()=>{
     win.webContents.sendInputEvent({type:'mouseMove',x:500,y:239});await delay(200);
     assert.equal(await scale(0),1);checks.push('reduced motion disables magnification');
     await win.webContents.debugger.sendCommand('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'no-preference'}]});
+    await js('document.getElementById("fixture-desktop").remove()');
+    const edgeFixture={file:'Project Brief.docx',path:'fixture/Project Brief.docx',targets:['pdf','txt','odt'],busy:false,result:null,office:true,helperReady:true,message:'',anchor:{x:36,y:400},presentation:1,job:null};
+    win.webContents.send('fixture-state',edgeFixture);await delay(400);
+    await assertClear({x:21,y:385,width:30,height:30});
+    checks.push('edge-positioned source file remains visible through the ring');
     win.setSize(370,228);
     await win.loadFile(path.join(__dirname,'../dist/index.html'),{query:{mode:'status'}});await delay(250);
     const base={file:null,path:null,targets:[],busy:false,result:null,office:true,helperReady:true,message:'',presentation:0};

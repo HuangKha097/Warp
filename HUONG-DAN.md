@@ -1,9 +1,9 @@
-# Warp 0.4.0 — hướng dẫn sử dụng
+# Warp 0.4.1 — hướng dẫn sử dụng
 
-1. Thoát Warp bản cũ rồi cài `Warp-Setup-0.4.0.exe`. Bộ chuyển đổi đã đi kèm, không phải cài LibreOffice riêng.
+1. Thoát Warp bản cũ rồi cài `Warp-Setup-0.4.1.exe`. Bộ chuyển đổi đã đi kèm, không phải cài LibreOffice riêng.
 2. Warp mở âm thầm trong khay hệ thống bên đồng hồ; không hiện cửa sổ menu. Bản cài đăng ký chạy khi đăng nhập Windows. Nếu chưa thấy logo, kiểm tra mục biểu tượng ẩn (dấu ^).
-3. Trên Desktop hoặc trong Explorer, bấm một lần chọn một tệp. Giữ **Alt + Shift** để hiện vòng tròn.
-4. Vẫn giữ hai phím, nhấn giữ chuột trên tệp ở tâm, kéo sang múi định dạng phù hợp rồi thả chuột để xác nhận.
+3. Trên Desktop hoặc trong Explorer, bấm một lần chọn một tệp. Giữ **Alt + Shift** để hiện vòng tròn. Phần tâm rỗng để nhìn thấy tệp gốc phía dưới, không vẽ lại icon và tên tệp.
+4. Vẫn giữ hai phím, nhấn giữ chuột trên tệp ở tâm, kéo sang múi định dạng phù hợp rồi thả chuột để xác nhận. Nếu tệp sát mép màn hình, vòng tròn dịch vào trong; vẫn có thể bắt đầu kéo từ vị trí tệp gốc hoặc tâm vòng tròn.
 5. Vòng tròn đóng sau khi xác nhận. Bảng nhỏ ở **góc phải dưới** báo đang chuẩn bị, đang chuyển đổi hoặc đang lưu bản sao, cùng thanh loading và thời gian chờ.
 6. Có thể chọn tệp khác và gọi vòng tròn tiếp trong lúc tệp trước đang xử lý; các yêu cầu sẽ xếp hàng và chạy lần lượt.
 7. Khi xong, bảng báo tên kết quả và có nút **Mở thư mục**. File mới nằm cạnh file gốc; trùng tên thì thêm số. Thành công tự ẩn sau khoảng 8 giây.
