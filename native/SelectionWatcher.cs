@@ -6,7 +6,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Windows.Automation;
 
-// Captures Explorer selection BEFORE Electron activates its overlay.
+// Captures Explorer selection BEFORE Warp shows its non-activating overlay.
 class SelectionWatcher {
   sealed class Request {public int Gesture;public IntPtr Window;}
   static readonly AutoResetEvent captureReady=new AutoResetEvent(false);

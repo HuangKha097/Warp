@@ -1,84 +1,39 @@
 {
   "name": "warp",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "private": true,
   "description": "A local-first radial file converter for Windows",
   "author": "Warp contributors",
   "license": "MIT",
-  "main": "dist-electron/main.js",
   "scripts": {
-    "build": "node scripts/create-icon.cjs && vite build && tsc -p tsconfig.electron.json && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1",
-    "start": "npm run build && electron .",
-    "check": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
+    "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
+    "build": "node scripts/create-icon.cjs && vite build && powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1",
+    "start": "node scripts/tauri.cjs dev",
+    "tauri": "node scripts/tauri.cjs",
+    "check": "tsc --noEmit",
+    "check:rust": "node scripts/cargo.cjs check --manifest-path src-tauri/Cargo.toml",
+    "test:rust": "node scripts/cargo.cjs test --manifest-path src-tauri/Cargo.toml",
     "test": "tsx --test tests/*.test.ts",
+    "test:ui": "playwright test",
     "test:native": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-native.ps1",
-    "package": "npm run prepare:engine && npm run build && electron-builder --win nsis --x64",
+    "package": "npm run prepare:engine && node scripts/tauri.cjs build --bundles nsis",
     "prepare:engine": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/prepare-engine.ps1",
-    "test:engine": "tsx --test tests/engine.integration.ts",
-    "test:visual": "electron tests/electron/visual-smoke.cjs",
-    "test:runtime": "electron tests/electron/runtime-smoke.cjs",
-    "test:setup": "electron tests/electron/setup-smoke.cjs"
+    "test:engine": "node scripts/cargo.cjs test --manifest-path src-tauri/Cargo.toml --test engine -- --ignored",
+    "test:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-runtime.ps1"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@tauri-apps/cli": "2.12.4",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "electron": "^42.0.0",
-    "electron-builder": "^26.0.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
     "vite": "^7.0.0"
-  },
-  "build": {
-    "appId": "io.warp.converter",
-    "productName": "Warp",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
-      "assets/**/*",
-      "LICENSE",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "native/SelectionWatcher.exe",
-        "to": "SelectionWatcher.exe"
-      },
-      {
-        "from": "vendor/libreoffice",
-        "to": "libreoffice",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "to": "THIRD-PARTY-NOTICES.md",
-        "from": "THIRD-PARTY-NOTICES.md"
-      }
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "assets/warp.ico",
-      "signExecutable": false
-    },
-    "nsis": {
-      "allowElevation": false,
-      "artifactName": "Warp-Setup-${version}.${ext}",
-      "createStartMenuShortcut": true,
-      "createDesktopShortcut": false,
-      "perMachine": false,
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "installerLanguages": ["en_US", "vi_VN"],
-      "displayLanguageSelector": true,
-      "include": "scripts/installer.nsh"
-    }
   }
 }

@@ -1,2 +1,7 @@
 import { defineConfig } from 'vite';
-export default defineConfig({ base: './', build: { outDir: 'dist' } });
+export default defineConfig({
+  base: './',
+  build: {outDir:'dist'},
+  server: {watch: {ignored:['**/src-tauri/**','**/native/**','**/vendor/**','**/.cache/**']}},
+  clearScreen: false
+});

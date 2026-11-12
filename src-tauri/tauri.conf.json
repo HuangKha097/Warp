@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Warp",
+  "version": "0.6.0",
+  "identifier": "io.warp.converter",
+  "build": {
+    "beforeDevCommand": "npm run build && npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src ipc: http://ipc.localhost",
+      "capabilities": [
+        {
+          "identifier": "app-events",
+          "windows": [
+            "overlay",
+            "status",
+            "companion"
+          ],
+          "permissions": [
+            "core:event:allow-listen",
+            "core:event:allow-unlisten"
+          ]
+        }
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "../assets/warp.ico"
+    ],
+    "resources": {
+      "../native/SelectionWatcher.exe": "SelectionWatcher.exe",
+      "../vendor/libreoffice/": "libreoffice/",
+      "../THIRD-PARTY-NOTICES.md": "THIRD-PARTY-NOTICES.md"
+    },
+    "licenseFile": "../LICENSE",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "template": "../scripts/tauri-installer.nsi",
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "Vietnamese"
+        ],
+        "displayLanguageSelector": true,
+        "startMenuFolder": "Warp"
+      }
+    }
+  }
+}

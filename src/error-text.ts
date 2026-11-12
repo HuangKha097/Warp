@@ -1,4 +1,4 @@
-import type {Language} from '../electron/contracts';
+import type {Language} from '../shared/contracts';
 
 const english:Record<string,string>={
   'Không có quyền đọc tệp hoặc ghi bản chuyển đổi vào thư mục này.':'You do not have permission to read the file or write to this folder.',

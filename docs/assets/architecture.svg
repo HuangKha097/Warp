@@ -990,23 +990,23 @@ been cleared for every commercial, promotional, or redistributive use.</metadata
         </g>
         <g data-graph-role="automatic-crossover" style="--step:1">
           <path data-graph-role="automatic-crossover-underlay" d="M 520 71 L 660 71" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="windows-helper" data-edge-to="electron-main" data-edge-label="JSON qua stdout" data-edge-key="1" data-edge-id="selection-events" data-composition-points="520,71;660,71" data-composition-crossover="halo" data-composition-independent="true" d="M 520 71 L 660 71" class="a-dashed" data-animate="edge" style="--step: 1;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-edge-from="windows-helper" data-edge-to="tauri-core" data-edge-label="JSON qua stdout" data-edge-key="1" data-edge-id="selection-events" data-composition-points="520,71;660,71" data-composition-crossover="halo" data-composition-independent="true" d="M 520 71 L 660 71" class="a-dashed" data-animate="edge" style="--step: 1;" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:2">
           <path data-graph-role="automatic-crossover-underlay" d="M 757 130 L 757 280" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="electron-main" data-edge-to="radial-overlay" data-edge-label="Hiện khi giữ phím" data-edge-key="2" data-edge-id="show-overlay" data-composition-points="757,130;757,280" data-composition-crossover="halo" data-composition-independent="true" d="M 757 130 L 757 280" class="a-default" data-animate="edge" style="--step: 2;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="tauri-core" data-edge-to="radial-overlay" data-edge-label="Hiện khi giữ phím" data-edge-key="2" data-edge-id="show-overlay" data-composition-points="757,130;757,280" data-composition-crossover="halo" data-composition-independent="true" d="M 757 130 L 757 280" class="a-default" data-animate="edge" style="--step: 2;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:3">
           <path data-graph-role="automatic-crossover-underlay" d="M 743 280 L 743 130" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="radial-overlay" data-edge-to="electron-main" data-edge-label="IPC đích hợp lệ" data-edge-key="3" data-edge-id="confirm-conversion" data-composition-points="743,280;743,130" data-composition-crossover="halo" data-composition-independent="true" d="M 743 280 L 743 130" class="a-default" data-animate="edge" style="--step: 3;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="radial-overlay" data-edge-to="tauri-core" data-edge-label="IPC đích hợp lệ" data-edge-key="3" data-edge-id="confirm-conversion" data-composition-points="743,280;743,130" data-composition-crossover="halo" data-composition-independent="true" d="M 743 280 L 743 130" class="a-default" data-animate="edge" style="--step: 3;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
           <path data-graph-role="automatic-crossover-underlay" d="M 840 78 L 1030 78" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="electron-main" data-edge-to="serial-queue" data-edge-label="Xác nhận → xếp hàng" data-edge-key="4" data-edge-id="enqueue-copy" data-composition-points="840,78;1030,78" data-composition-crossover="halo" data-composition-independent="true" d="M 840 78 L 1030 78" class="a-default" data-animate="edge" style="--step: 4;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="tauri-core" data-edge-to="serial-queue" data-edge-label="Xác nhận → xếp hàng" data-edge-key="4" data-edge-id="enqueue-copy" data-composition-points="840,78;1030,78" data-composition-crossover="halo" data-composition-independent="true" d="M 840 78 L 1030 78" class="a-default" data-animate="edge" style="--step: 4;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
           <path data-graph-role="automatic-crossover-underlay" d="M 1030 92 L 840 92" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="serial-queue" data-edge-to="electron-main" data-edge-label="Trạng thái tác vụ" data-edge-key="5" data-edge-id="queue-state" data-composition-points="1030,92;840,92" data-composition-crossover="halo" data-composition-independent="true" d="M 1030 92 L 840 92" class="a-default" data-animate="edge" style="--step: 5;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="serial-queue" data-edge-to="tauri-core" data-edge-label="Trạng thái tác vụ" data-edge-key="5" data-edge-id="queue-state" data-composition-points="1030,92;840,92" data-composition-crossover="halo" data-composition-independent="true" d="M 1030 92 L 840 92" class="a-default" data-animate="edge" style="--step: 5;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:6">
           <path data-graph-role="automatic-crossover-underlay" d="M 1120 130 L 1120 280" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
@@ -1022,11 +1022,11 @@ been cleared for every commercial, promotional, or redistributive use.</metadata
         </g>
         <g data-graph-role="automatic-crossover" style="--step:9">
           <path data-graph-role="automatic-crossover-underlay" d="M 660 85 L 603 85 Q 595 85 595 93 L 595 305 Q 595 313 587 313 L 530 313" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="electron-main" data-edge-to="progress-popup" data-edge-label="Gửi tiến trình" data-edge-key="9" data-edge-id="display-progress" data-composition-points="660,85;595,85;595,313;530,313" data-composition-crossover="halo" data-composition-independent="true" d="M 660 85 L 603 85 Q 595 85 595 93 L 595 305 Q 595 313 587 313 L 530 313" class="a-default" data-animate="edge" style="--step: 9;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="tauri-core" data-edge-to="progress-popup" data-edge-label="Gửi tiến trình" data-edge-key="9" data-edge-id="display-progress" data-composition-points="660,85;595,85;595,313;530,313" data-composition-crossover="halo" data-composition-independent="true" d="M 660 85 L 603 85 Q 595 85 595 93 L 595 305 Q 595 313 587 313 L 530 313" class="a-default" data-animate="edge" style="--step: 9;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:10">
           <path data-graph-role="automatic-crossover-underlay" d="M 530 327 L 628 327 Q 636 327 636 319 L 636 107 Q 636 99 644 99 L 660 99" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="progress-popup" data-edge-to="electron-main" data-edge-label="IPC thử lại" data-edge-key="10" data-edge-id="retry-conversion" data-composition-points="530,327;636,327;636,99;660,99" data-composition-crossover="halo" data-composition-independent="true" d="M 530 327 L 628 327 Q 636 327 636 319 L 636 107 Q 636 99 644 99 L 660 99" class="a-default" data-animate="edge" style="--step: 10;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+          <path data-edge-from="progress-popup" data-edge-to="tauri-core" data-edge-label="IPC thử lại" data-edge-key="10" data-edge-id="retry-conversion" data-composition-points="530,327;636,327;636,99;660,99" data-composition-crossover="halo" data-composition-independent="true" d="M 530 327 L 628 327 Q 636 327 636 319 L 636 107 Q 636 99 644 99 L 660 99" class="a-default" data-animate="edge" style="--step: 10;" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
 
         <!-- Components -->
@@ -1053,15 +1053,15 @@ been cleared for every commercial, promotional, or redistributive use.</metadata
         <text x="435" y="92" class="t-muted" font-size="9" text-anchor="middle">Phím · Shell COM · UIA</text>
         </g>
 
-        <g id="node-electron-main" data-node-id="electron-main" data-node-label="Electron main" tabindex="0" role="button" aria-label="Xem Electron main, Khay hệ thống · kiểm tra IPC, Thành phần kiến trúc" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Khay hệ thống · kiểm tra IPC" data-node-context="Thành phần kiến trúc">
-          <title>Electron main · Khay hệ thống · kiểm tra IPC · Thành phần kiến trúc</title>
+        <g id="node-tauri-core" data-node-id="tauri-core" data-node-label="Tauri / Rust" tabindex="0" role="button" aria-label="Xem Tauri / Rust, Khay hệ thống · kiểm tra lệnh, Thành phần kiến trúc" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Khay hệ thống · kiểm tra lệnh" data-node-context="Thành phần kiến trúc">
+          <title>Tauri / Rust · Khay hệ thống · kiểm tra lệnh · Thành phần kiến trúc</title>
           <rect x="660" y="40" width="180" height="90" rx="8" class="c-mask"/>
           <rect x="660" y="40" width="180" height="90" rx="8" class="c-backend" data-animate="node" style="--step: 2; --flow-node-name: archify-relay-node-2;" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(666 46) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
-          <text data-node-label="" x="750" y="83" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Electron main</text>
-        <text x="750" y="99" class="t-muted" font-size="9" text-anchor="middle">Khay hệ thống · kiểm tra IPC</text>
+          <text data-node-label="" x="750" y="83" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Tauri / Rust</text>
+        <text x="750" y="99" class="t-muted" font-size="9" text-anchor="middle">Khay hệ thống · kiểm tra lệnh</text>
         </g>
 
         <g id="node-serial-queue" data-node-id="serial-queue" data-node-label="Hàng đợi tác vụ" tabindex="0" role="button" aria-label="Xem Hàng đợi tác vụ, Trong bộ nhớ · chạy lần lượt, Thành phần kiến trúc" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="Trong bộ nhớ · chạy lần lượt" data-node-context="Thành phần kiến trúc">
@@ -1145,23 +1145,23 @@ been cleared for every commercial, promotional, or redistributive use.</metadata
           <rect x="248.6" y="58" width="62.8" height="14" rx="3" class="c-mask"/>
           <text x="280" y="68" class="t-edge-default" font-size="8" text-anchor="middle">Alt + Shift</text>
         </g>
-        <g data-edge-from="windows-helper" data-edge-to="electron-main" data-edge-label="JSON qua stdout" data-edge-key="1" data-edge-id="selection-events">
+        <g data-edge-from="windows-helper" data-edge-to="tauri-core" data-edge-label="JSON qua stdout" data-edge-key="1" data-edge-id="selection-events">
           <rect x="549" y="51" width="82" height="14" rx="3" class="c-mask"/>
           <text x="590" y="61" class="t-edge-dashed" font-size="8" text-anchor="middle">JSON qua stdout</text>
         </g>
-        <g data-edge-from="electron-main" data-edge-to="radial-overlay" data-edge-label="Hiện khi giữ phím" data-edge-key="2" data-edge-id="show-overlay">
+        <g data-edge-from="tauri-core" data-edge-to="radial-overlay" data-edge-label="Hiện khi giữ phím" data-edge-key="2" data-edge-id="show-overlay">
           <rect x="763" y="198" width="91.6" height="14" rx="3" class="c-mask"/>
           <text x="808.8" y="208" class="t-edge-default" font-size="8" text-anchor="middle">Hiện khi giữ phím</text>
         </g>
-        <g data-edge-from="radial-overlay" data-edge-to="electron-main" data-edge-label="IPC đích hợp lệ" data-edge-key="3" data-edge-id="confirm-conversion">
+        <g data-edge-from="radial-overlay" data-edge-to="tauri-core" data-edge-label="IPC đích hợp lệ" data-edge-key="3" data-edge-id="confirm-conversion">
           <rect x="655" y="235.5" width="82" height="14" rx="3" class="c-mask"/>
           <text x="696" y="245.5" class="t-edge-default" font-size="8" text-anchor="middle">IPC đích hợp lệ</text>
         </g>
-        <g data-edge-from="electron-main" data-edge-to="serial-queue" data-edge-label="Xác nhận → xếp hàng" data-edge-key="4" data-edge-id="enqueue-copy">
+        <g data-edge-from="tauri-core" data-edge-to="serial-queue" data-edge-label="Xác nhận → xếp hàng" data-edge-key="4" data-edge-id="enqueue-copy">
           <rect x="884.4" y="58" width="101.2" height="14" rx="3" class="c-mask"/>
           <text x="935" y="68" class="t-edge-default" font-size="8" text-anchor="middle">Xác nhận → xếp hàng</text>
         </g>
-        <g data-edge-from="serial-queue" data-edge-to="electron-main" data-edge-label="Trạng thái tác vụ" data-edge-key="5" data-edge-id="queue-state">
+        <g data-edge-from="serial-queue" data-edge-to="tauri-core" data-edge-label="Trạng thái tác vụ" data-edge-key="5" data-edge-id="queue-state">
           <rect x="889.2" y="102" width="91.6" height="14" rx="3" class="c-mask"/>
           <text x="935" y="112" class="t-edge-default" font-size="8" text-anchor="middle">Trạng thái tác vụ</text>
         </g>
@@ -1177,11 +1177,11 @@ been cleared for every commercial, promotional, or redistributive use.</metadata
           <rect x="901.2" y="415" width="67.6" height="14" rx="3" class="c-mask"/>
           <text x="935" y="425" class="t-edge-default" font-size="8" text-anchor="middle">Chép tên mới</text>
         </g>
-        <g data-edge-from="electron-main" data-edge-to="progress-popup" data-edge-label="Gửi tiến trình" data-edge-key="9" data-edge-id="display-progress">
+        <g data-edge-from="tauri-core" data-edge-to="progress-popup" data-edge-label="Gửi tiến trình" data-edge-key="9" data-edge-id="display-progress">
           <rect x="511.79999999999995" y="192" width="77.2" height="14" rx="3" class="c-mask"/>
           <text x="550.4" y="202" class="t-edge-default" font-size="8" text-anchor="middle">Gửi tiến trình</text>
         </g>
-        <g data-edge-from="progress-popup" data-edge-to="electron-main" data-edge-label="IPC thử lại" data-edge-key="10" data-edge-id="retry-conversion">
+        <g data-edge-from="progress-popup" data-edge-to="tauri-core" data-edge-label="IPC thử lại" data-edge-key="10" data-edge-id="retry-conversion">
           <rect x="604.6" y="193" width="62.8" height="14" rx="3" class="c-mask"/>
           <text x="636" y="203" class="t-edge-default" font-size="8" text-anchor="middle">IPC thử lại</text>
         </g>

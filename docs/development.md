@@ -1,64 +1,73 @@
-# Phát triển Warp
+# Phát triển Warp 0.6 (Tauri + React)
 
-## Môi trường
+## Môi trường Windows x64
 
-Windows x64, Node.js 22.12+ hoặc bản LTS mới tương thích, npm và .NET Framework 4.x. CI sử dụng Node.js 24. Người dùng ứng dụng chỉ cần bộ cài Warp.
+- Node.js 22.12+ và npm; CI dùng Node.js 24.
+- Rust stable với target `x86_64-pc-windows-msvc`.
+- Visual Studio C++ Build Tools và Windows SDK.
+- Microsoft Edge WebView2 Runtime.
+- .NET Framework 4.x để build helper đọc Windows Shell.
 
 ```powershell
 npm ci
-node node_modules/electron/install.js
 npm run prepare:engine
 npm start
 ```
 
-`npm start` build rồi chạy ứng dụng. Hồ sơ mới hiện onboarding một lần; sau khi hoàn tất/bỏ qua, các lần chạy sau chỉ hiện icon khay. Giữ Alt + Shift trên một tệp đã chọn trong Desktop/Explorer để mở vòng tròn. Nhấn phải icon khay để mở Settings hoặc xem lại hướng dẫn.
+`npm start` build icon/helper, mở Vite ở `127.0.0.1:1420`, rồi chạy app Tauri. Chỉ Vite phục vụ giao diện trong lúc phát triển; bản phát hành dùng tài nguyên đã nhúng, không chạy Node.js/server. Rust nằm trong `src-tauri/`, React trong `src/`, contract JSON trong `shared/contracts.ts`.
 
-## Build và đóng gói
+Rust cài theo cách thông thường được nhận từ PATH. Các wrapper `scripts/toolchain.cjs` cũng nhận toolchain riêng ở `.cache/cargo` và `.cache/rustup`; không cần thay đổi PATH của Windows.
+
+## Build và kiểm tra
 
 ```powershell
 npm run check
+npm test
 npm run build
-npm run package -- --publish never
+npm run test:native
+npm run test:rust
+npm run test:engine
+npm run test:runtime
+npm run package
 ```
 
-Bộ cài NSIS được tạo trong `release/`. CI chạy kiểm tra và lưu bộ cài thành artifact **Warp-Windows**; xuất bản GitHub Release là bước riêng của người bảo trì. Chưa cấu hình cập nhật tự động.
+`build` chỉ build frontend và helper. `check:rust` kiểm tra backend; `tauri build --no-bundle` build app executable. `package` chuẩn bị LibreOffice đầy đủ, build bản release, rồi tạo NSIS ở `src-tauri/target/release/bundle/nsis/`. CI lưu artifact; khi đẩy tag `v<version>` trùng package.json và toàn bộ kiểm tra/build thành công, CI xuất bản prerelease GitHub với bộ cài và SHA-256. Ghi chú phát hành nằm ở `docs/releases/v<version>.md`. Không có auto-update.
 
-`prepare:engine` là bước build: tải bản LibreOffice đã ghim phiên bản và SHA-256, giải nén vào `vendor/libreoffice`, rồi đóng gói cùng ứng dụng. Bước này không cài LibreOffice vào Windows hoặc thay đổi liên kết mở tệp. Giữ nguyên giấy phép trong runtime và [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md) khi phân phối lại.
+`prepare:engine` tải đúng LibreOffice 26.8.2 đã ghim SHA-256, giải nén vào `vendor/libreoffice`, không cài vào Windows. Giữ nguyên giấy phép và notices của engine. Dung lượng engine độc lập với thay đổi Electron → Tauri; không có cơ chế tải engine theo nhu cầu trong bản này.
 
-## Cấu trúc mã nguồn
+## Cấu trúc và hành vi
 
-| Thư mục | Trách nhiệm |
-| :--- | :--- |
-| `src/` | Giao diện React: vòng tròn, hiệu ứng Dock và thông báo tiến trình |
-| `electron/` | Main process, preload, contract IPC, trạng thái lựa chọn và hàng đợi |
-| `native/` | Helper C# đọc phím và đường dẫn tệp từ Windows Shell; UI Automation cung cấp tọa độ icon |
-| `scripts/` | Build helper/icon, chuẩn bị bộ chuyển đổi, kiểm tra native và cấu hình NSIS |
-| `tests/` | Unit/integration test; harness Electron nằm trong `tests/electron/` |
-| `docs/` | Hướng dẫn, phạm vi kiểm thử, hình minh họa và sơ đồ kiến trúc |
-| `assets/` | Logo nguồn, PNG và ICO ứng dụng |
+| Vị trí | Trách nhiệm |
+| --- | --- |
+| `src/` | React, animation, onboarding, Settings và bridge Tauri |
+| `shared/contracts.ts` | Kiểu dữ liệu gửi giữa Rust và React |
+| `src-tauri/src/app.rs` | Khởi động, cửa sổ, tray và single instance |
+| `src-tauri/src/commands.rs` | API dành riêng cho từng cửa sổ |
+| `src-tauri/src/runtime.rs` | Trạng thái app, DPI/monitor, trình chạy hàng đợi |
+| `src-tauri/src/conversion.rs` | Gọi LibreOffice, snapshot, hủy/timeout, tạo bản sao không ghi đè |
+| `src-tauri/src/preferences.rs` | JSON settings, xác thực, ghi thay thế nguyên tử |
+| `src-tauri/src/watcher.rs` | Giao thức helper, gesture và watchdog tự phục hồi |
+| `native/` | Helper C# đọc phím, Windows Shell và tọa độ UI Automation |
+| `scripts/tauri-installer.nsi` | Mẫu NSIS Tauri có trang đồng ý MIT và không tạo shortcut Desktop |
 
-`ProgressCard.tsx` render chữ, nút, trạng thái và thời gian bằng React DOM. `progress.css` xử lý spinner, thanh loading và góc bo. Chỉ logo thương hiệu dùng ảnh; toàn bộ hộp thông báo không được dựng từ ảnh chụp hoặc canvas.
+Overlay/status dùng WebView2 trong suốt, không viền/shadow, không lấy focus, luôn ở trên. Helper gửi tọa độ vật lý; Rust đặt cửa sổ theo work area của monitor và đổi anchor sang logical pixel theo DPI. Renderer không chạy quy trình chuyển đổi. Khi xác nhận, Rust ẩn overlay trước khi enqueue; khi nhả phím, kết quả capture cũ không được mở lại vòng tròn.
 
-Cửa sổ thông báo dùng nền trong suốt, tắt native shadow và Windows thick frame. Màu nền chỉ được vẽ trên card bo góc để các góc ngoài luôn trong suốt.
+Mỗi conversion chạy nối tiếp trên worker riêng, dùng bản sao nguồn và profile LibreOffice tạm. Timeout 120 giây; Exit dừng helper và cây tiến trình chuyển đổi. Đầu ra dùng `create_new` để tránh ghi đè kể cả khi nhiều bên lưu cùng lúc; file đích dở dang do lỗi sao chép được xóa. Mỗi job và retry giữ nguyên lựa chọn thư mục tại thời điểm enqueue.
 
-`Companion.tsx` chứa onboarding ba bước và Settings. Module này được tải khi cần; GIF và poster trong `assets/onboarding/` dùng cùng minh họa đã duyệt. Reduced motion dùng PNG, người dùng có thể bật/tắt chuyển động. Cửa sổ có thể cuộn trên màn hình nhỏ; đóng cửa sổ vẫn giữ Warp trong khay.
+Backend chỉ cho phép các cửa sổ phù hợp gọi lệnh; không có API frontend cho shell, đường dẫn hay URL tùy ý. CSP chỉ cho tài nguyên cục bộ và IPC. Thư mục và giấy phép được mở qua những lệnh giới hạn. Companion được tạo khi cần và hủy khi đóng để giải phóng WebView của Settings.
 
-`preferences.ts` lưu `%APPDATA%\Warp\settings.json` với phiên bản schema, ghi file tạm rồi rename và tuần tự hóa các thay đổi. JSON hỏng được giữ lại dưới tên `.invalid-*`. Không dùng database. Main process xác thực IPC, thư mục đầu ra và quyền ghi; renderer không có API mở URL hoặc đường dẫn tùy ý. Thư mục cài ứng dụng do NSIS quản lý, Settings chỉ hiển thị vị trí.
+## Hồ sơ và chuyển từ Electron
 
-Thư mục đích được chụp tại thời điểm enqueue, bao gồm retry; đổi Settings không di chuyển tác vụ đã xác nhận. Bản gốc và đầu ra trùng tên luôn được bảo vệ bằng `COPYFILE_EXCL`.
+Bản phát hành đọc cùng `%APPDATA%\Warp\settings.json`, giữ schema và các lựa chọn cũ. JSON lỗi được giữ thành `.invalid-*`. Startup vẫn dùng khóa HKCU Run `Warp`; mục đang bật được cập nhật sang executable Tauri khi khởi động. Không tự bật lại mục startup đã tắt khi nâng cấp.
 
-NSIS dùng wizard có lựa chọn ngôn ngữ, trang MIT với ô đồng ý không tick sẵn và link GitHub, cùng trang thư mục cài. `installer-language` trong thư mục cài cung cấp ngôn ngữ ban đầu; hồ sơ đã có Settings giữ lựa chọn cũ. Đăng ký startup do app quản lý ở lần chạy đầu trong bản đã đóng gói; các lần cập nhật không ghi đè lựa chọn hiện có. Bản dev và test không đăng ký startup. Bộ cài không tạo shortcut Desktop; có shortcut Start Menu.
+Bản debug và smoke dùng `.cache/tauri-dev` hoặc `WARP_DATA_DIR`, không đăng ký startup. Có thể dùng `WARP_ENGINE_DIR` để chỉ runtime trong lúc phát triển; bản phát hành chỉ dùng engine resource và LibreOffice cài sẵn được phát hiện.
 
-## Kiểm thử
+Trước khi cài bản Tauri, thoát Warp Electron từ tray và gỡ bản Electron cũ để không giữ hai app và hai bản engine trên ổ đĩa. Sao lưu `%APPDATA%\Warp\settings.json` nếu trình gỡ cài đặt có tùy chọn xóa dữ liệu. Cài/upgrade từ Electron và uninstallation phải được nghiệm thu trên Windows sạch trước khi phát hành rộng rãi.
 
-Xem [testing.md](testing.md) để chạy kiểm tra và phân biệt bằng chứng tự động với nghiệm thu Desktop thật. Đầu ra kiểm tra nằm trong `.cache/`; không commit các ảnh hoặc biên nhận phát sinh.
-
-`node_modules/`, `vendor/`, `dist/`, `dist-electron/`, `release/`, `.cache/` và `.archify/` không được đưa vào Git. Hình công khai dùng trong README nằm trong `docs/assets/`.
+Bộ cài chọn English/Vietnamese, trang MIT có ô đồng ý chưa tick và link GitHub, cho chọn thư mục cài, có Start Menu shortcut, không có Desktop shortcut. Nếu thiếu WebView2, bootstrapper cần Internet. Giữ `scripts/TAURI-LICENSE-MIT` khi chỉnh sửa/phân phối mẫu NSIS.
 
 ## Chẩn đoán
 
-- **Không thấy Warp:** kiểm tra khay biểu tượng ẩn `^`. Ứng dụng chỉ cho phép một phiên chạy.
-- **Không đọc được tệp:** chọn đúng một tệp đã có trên ổ đĩa, nhả rồi giữ lại Alt + Shift. Kiểm tra thêm bố cục Explorer, tab và DPI theo danh sách nghiệm thu.
-- **Không chuyển đổi được:** xem lý do trong thông báo, quyền ghi và dung lượng thư mục đích. Nếu thiếu engine tích hợp, cài lại bộ cài đầy đủ.
+Log tại `%APPDATA%\Warp\runtime.log` trong release, hoặc thư mục dữ liệu debug, ghi các mốc khởi động/helper/vòng tròn; không ghi đường dẫn tệp của người dùng. Application Control có thể chặn build script, helper hoặc executable mới chưa ký. Không tắt chính sách bảo mật; dùng môi trường build cho phép các chương trình phát triển chạy.
 
-Log tại `%APPDATA%\Warp\runtime.log` ghi các mốc khởi động/helper/vòng tròn, không ghi tên tệp từ các sự kiện này. Khi báo lỗi, cung cấp phiên bản Warp, Windows, định dạng nguồn/đích và thông báo lỗi; tránh đính kèm tài liệu nhạy cảm.
+Xem [testing.md](testing.md) và [biên bản chuyển đổi](validation/2026-11-12-tauri-migration.md) để biết bằng chứng đã có và phần cần nghiệm thu.

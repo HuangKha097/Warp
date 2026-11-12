@@ -1,0 +1,55 @@
+[package]
+name = "warp"
+version = "0.6.0"
+description = "Local radial file converter for Windows"
+authors = ["Warp contributors"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "warp_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [], optional = true }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-ico"], optional = true }
+tauri-plugin-single-instance = { version = "2", optional = true }
+tauri-plugin-dialog = { version = "2", optional = true }
+tauri-plugin-opener = { version = "2", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+url = "2"
+sys-locale = "0.3"
+tokio = { version = "1", features = ["time"] }
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.55"
+
+[features]
+default = ["desktop"]
+custom-protocol = ["desktop", "tauri/custom-protocol"]
+desktop = ["dep:tauri-build", "dep:tauri", "dep:tauri-plugin-single-instance", "dep:tauri-plugin-dialog", "dep:tauri-plugin-opener"]
+smoke-test = ["desktop"]
+
+[[bin]]
+name = "warp"
+path = "src/main.rs"
+required-features = ["desktop"]
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true
+panic = "abort"
+
+[profile.dev]
+debug = 0
+incremental = false
+
+[profile.test]
+debug = 0
+incremental = false

@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import type {ProgressState} from './types';
-import type {Language} from '../electron/contracts';
+import type {Language} from '../shared/contracts';
 import {errorText} from './error-text';
 import logo from '../assets/warp.png';
 import './progress.css';

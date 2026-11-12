@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import type {PreferencePatch, SettingsResult, SettingsState} from '../electron/contracts';
+import type {PreferencePatch, SettingsResult, SettingsState} from '../shared/contracts';
 import logo from '../assets/warp.png';
 import selectGif from '../assets/onboarding/01-select.gif';
 import selectPng from '../assets/onboarding/01-select.png';

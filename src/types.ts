@@ -1,5 +1,5 @@
-import type {AppState,Bridge} from '../electron/contracts';
-export type {AppState,ProgressState} from '../electron/contracts';
+import type {AppState,Bridge} from '../shared/contracts';
+export type {AppState,ProgressState} from '../shared/contracts';
 
 declare global {interface Window {warp?: Bridge}}
 

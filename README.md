@@ -12,7 +12,7 @@
   <a href="https://github.com/HuangKha097/Warp/issues">Báo lỗi</a>
 </p>
 
-<p align="center">Windows x64 · Phiên bản thử nghiệm 0.5.0</p>
+<p align="center">Windows x64 · Tauri + React · Mã nguồn 0.6.0</p>
 
 <p align="center">
   <img src="docs/assets/radial-menu.png" width="440" alt="Vòng tròn chọn định dạng của Warp">
@@ -26,7 +26,7 @@ Warp mở một vòng tròn định dạng quanh tệp đang chọn khi bạn gi
 
 ## Cài đặt
 
-Tải bộ cài **Warp-Setup-*.exe** tại [Releases](https://github.com/HuangKha097/Warp/releases) và chạy bộ cài. Bộ chuyển đổi đã được tích hợp, không cần cài LibreOffice hoặc Microsoft Office riêng.
+Tải bộ cài Windows tại [Releases](https://github.com/HuangKha097/Warp/releases) và chạy bộ cài. Bộ chuyển đổi đã được tích hợp, không cần cài LibreOffice hoặc Microsoft Office riêng. Mã nguồn 0.6 chuyển từ Electron sang Tauri; việc đổi mã nguồn không tự xuất bản bộ cài mới lên Releases.
 
 Từ phiên bản 0.5, bộ cài cho phép chọn ngôn ngữ, yêu cầu đồng ý [giấy phép MIT](LICENSE), có link xem giấy phép trên GitHub và cho chọn thư mục cài ứng dụng. Lần chạy đầu hiển thị hướng dẫn minh họa ba bước; hoàn tất hoặc bỏ qua để Warp về khay hệ thống.
 
@@ -79,7 +79,9 @@ Hiện chưa hỗ trợ PDF đầu vào/OCR, nhiều tệp cùng lúc, thư mụ
 
 ![Kiến trúc xử lý tài liệu cục bộ của Warp](docs/assets/architecture.svg)
 
-React hiển thị vòng tròn và thông báo; Electron quản lý lựa chọn tệp, hàng đợi và bộ chuyển đổi cục bộ. Mỗi tác vụ dùng bản sao tạm và profile riêng. Ứng dụng không cần backend server hoặc database.
+React hiển thị vòng tròn và thông báo trong WebView2 của Windows. Tauri/Rust quản lý cửa sổ, khay hệ thống, hàng đợi, cài đặt và bộ chuyển đổi cục bộ; helper C# đọc lựa chọn từ Windows Shell. Bản phân phối không đóng gói Chromium hoặc Node.js riêng. Mỗi tác vụ dùng bản sao tạm và profile riêng. Ứng dụng không cần backend server hoặc database.
+
+LibreOffice vẫn được đóng gói đầy đủ để sử dụng offline sau cài đặt, nên đây vẫn là phần chiếm nhiều dung lượng. WebView2 dùng runtime chung; nếu thiếu, bộ cài cần mạng để tải runtime Microsoft. RAM, độ trễ Alt + Shift và dung lượng bản mới cần được đo trên bản build thực tế; không suy ra từ việc đổi framework.
 
 ## Phát triển
 

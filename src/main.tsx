@@ -4,7 +4,11 @@ import RadialMenu from './RadialMenu';
 import ProgressCard from './ProgressCard';
 import {emptyState,type AppState} from './types';
 import './style.css';
+import {installBridge,notifyReady} from './bridge';
+installBridge();
 const Companion=lazy(()=>import('./Companion'));
+
+function Ready(){useEffect(notifyReady,[]);return null;}
 
 function useAppState(){
   const [state,setState]=useState<AppState>(emptyState);
@@ -33,4 +37,4 @@ const companionMode=mode==='settings'||mode==='onboarding';
 document.body.classList.toggle('status-mode',mode==='status');
 document.body.classList.toggle('overlay-mode',!companionMode&&mode!=='status');
 document.body.classList.toggle('companion-mode',companionMode);
-createRoot(document.getElementById('root')!).render(companionMode?<Suspense fallback={null}><Companion mode={mode}/></Suspense>:mode==='status'?<Status/>:<Overlay/>);
+createRoot(document.getElementById('root')!).render(<>{companionMode?<Suspense fallback={null}><Companion mode={mode}/><Ready/></Suspense>:<><Ready/>{mode==='status'?<Status/>:<Overlay/>}</>}</>);

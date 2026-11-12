@@ -1,54 +1,33 @@
-# Phạm vi kiểm thử Warp
+# Kiểm thử Warp Tauri
 
-Các kiểm tra tự động giúp phát hiện hồi quy; chúng không thay thế nghiệm thu phím và chuột thật trên Desktop/Explorer.
+## Tự động
 
-## Chạy kiểm tra
-
-```powershell
-npm ci
-node node_modules/electron/install.js
-npm run check
-npm test
-npm run test:native
-npm run prepare:engine
-npm run test:engine
-npm run build
-npm run test:visual
-npm run test:runtime
-npm run test:setup
-```
-
-| Lớp kiểm tra | Phạm vi |
+| Lệnh | Phạm vi |
 | --- | --- |
-| TypeScript | Renderer, Electron và contract IPC; chặn biến/import/tham số không dùng |
-| Unit | Đích chuyển đổi tương thích; đầu ra không ghi đè; giữ/nhả phím; lựa chọn đến trễ; xếp hàng, lỗi/retry, hủy khi thoát; vùng thả; spring; phục hồi helper |
-| Native C# | Chạy chính `DesktopSelection.cs` với Shell view giả lập: đọc lại file gốc sau khi có bản PDF cùng tên gốc, chọn bản chuyển đổi rồi tệp tiếp theo, đường dẫn Desktop chuyển hướng; chặn lựa chọn rỗng/nhiều mục/thư mục/icon ảo/tệp mất; giữ nguyên dữ liệu nguồn |
-| Engine | Bộ chuyển đổi đã đóng gói được ưu tiên, tạo PDF/đích hỗ trợ và giữ nguyên đầu vào |
-| Renderer Electron | Tâm không có icon/nhãn vẽ lại, alpha tối đa 2/255; bốn góc và bốn mép trên hai kích thước vùng làm việc: tệp gốc rõ, múi nguyên vẹn, nhãn không tràn, ngoài viền không có pixel bóng hình chữ nhật; kéo từ tệp ở góc vẫn chuyển PDF đúng một lần; chặn đích sai; hover/spring/reduced motion; bảng tiến trình và các nút thao tác |
-| Runtime Electron | Main/preload/renderer thật và bộ chuyển đổi thật; cửa sổ tắt shadow/khung Windows, overlay dùng work area và tọa độ tương ứng; startup không mở menu; xác nhận chuyển đổi đóng overlay; tệp thứ hai được chọn và xếp hàng khi tệp đầu đang chạy; lỗi không khóa phím tắt; tệp sau chuyển thành công; reset helper và Exit |
-| Preferences | Mặc định cùng thư mục gốc, ghi tuần tự/nguyên tử, khôi phục sau restart, giữ JSON hỏng, chặn tùy chọn/đường dẫn không hợp lệ; mỗi tác vụ giữ đích đã chọn |
-| Onboarding/Settings Electron | Hồ sơ mới mở hướng dẫn; hoàn tất/bỏ qua lưu trạng thái và ẩn về khay; GIF/PNG và reduced motion; radio cùng thư mục gốc tick sẵn; hủy/chọn thư mục; PDF thật vào thư mục riêng; Việt/Anh cập nhật UI; link MIT cố định; chặn ghi Settings từ overlay; xem lại hướng dẫn không reset tùy chọn |
+| `npm run check` | TypeScript và contract frontend |
+| `npm test` | Hit testing, bố trí vòng tròn ở cạnh/góc và animation spring |
+| `npm run test:ui` | React thật trên Edge/Chromium với backend fixture: kéo chọn, Settings, onboarding và tiến trình |
+| `npm run build` | Vite production và biên dịch helper C# |
+| `npm run test:rust` | Settings, hàng đợi/retry, lưu không ghi đè, hủy và gesture/watchdog |
+| `npm run test:native` | Windows Shell selection, giữ nguyên lựa chọn và phát hiện lỗi Desktop |
+| `npm run test:engine` | LibreOffice thật: TXT → PDF vào thư mục Unicode, tránh trùng tên, giữ nguồn và TXT → DOCX |
+| `npm run test:runtime` | App Tauri thật, WebView2/IPC, helper, onboarding, đổi ngôn ngữ/thư mục, overlay → conversion → progress |
+| `npm run package` | Build release và NSIS đầy đủ |
 
-Harness runtime thay thế nguồn sự kiện bàn phím/Explorer và cách trình bày cửa sổ/khay. Nó không thao tác Desktop của người phát triển và không đăng ký startup trên máy khi chạy kiểm tra. Renderer dùng nền Desktop giả lập để chụp ảnh minh họa.
+`test:runtime` build feature `smoke-test` riêng, tạo hồ sơ/tệp trong `.cache/runtime-*`, chạy executable, kiểm tra report JSON và đóng app. Lệnh `smoke_step` và script tự điều khiển không được biên dịch vào bản release thông thường. Test không thay đổi startup hoặc hồ sơ thật. Có thể xem report ở thư mục được in ra khi chạy.
 
-`npm run test:native` biên dịch test bằng .NET Framework và không thay đổi lựa chọn Desktop. Có thể kiểm tra API Desktop Shell thật bằng lệnh chỉ đọc sau khi chạy test:
+Lõi Rust có thể kiểm tra trên Linux bằng `cargo test --manifest-path src-tauri/Cargo.toml --no-default-features --lib`. Kết quả này chỉ xác nhận logic dùng chung; không thay thế kiểm tra Windows/COM/WebView2. Cross-target `cargo check --target x86_64-pc-windows-msvc` kiểm tra kiểu và mã Windows; không chứng minh executable đã chạy.
 
-```powershell
-.\.cache\native-selection\DesktopSelectionTests.exe --probe
-```
+## Nghiệm thu Windows thực tế
 
-Với một tệp hợp lệ đang chọn, probe gọi API 5 lần và không ghi tên/đường dẫn tệp vào output. Trên máy phát triển, probe đã đọc được mục thật khi có hai file cùng tên gốc và Windows đang ẩn phần mở rộng. Đây là kiểm tra API chỉ đọc, chưa phải nghiệm thu toàn bộ thao tác chuột/phím Desktop sau chuyển đổi.
+- Chọn đúng một tệp trong Desktop và Explorer; giữ Alt + Shift, kéo tâm rỗng vào định dạng rồi thả; bản gốc vẫn nguyên và đầu ra có nội dung đúng.
+- Nhả một phím trước khi capture xong, nhấn nhanh nhiều lần, chuyển cửa sổ, đổi lựa chọn: không mở lại vòng tròn cũ.
+- Nhả phím và xác nhận chuyển đổi phải ẩn toàn bộ cửa sổ trong suốt, không để lớp chắn chuột trên Explorer.
+- Tab Explorer, icon lớn/nhỏ, nhiều màn hình, DPI 100/125/150/200%, màn hình có tọa độ âm, taskbar ở nhiều cạnh và icon sát góc.
+- Một hàng đợi nhiều tệp; lỗi do tệp hỏng/quyền ghi; retry đúng thư mục cũ sau khi đổi Settings; Exit lúc đang chuyển đổi không để lại helper/LibreOffice.
+- Tiến trình hiện đúng chữ/thời gian; góc ngoài card trong suốt; nút Ẩn/Mở thư mục/Thử lại; click tray mở lại thông báo đã ẩn.
+- Onboarding chỉ lần đầu; ngôn ngữ cập nhật cả tray/ring/status; startup bật/tắt qua lần đăng nhập mới; đóng Settings giữ app trong tray.
+- Bộ cài English/Vietnamese, ô đồng ý MIT chưa tick, link giấy phép, thư mục cài, không có Desktop shortcut, install/uninstall và nâng cấp từ Electron.
+- Đo dung lượng cài đặt riêng app/engine, tổng working set của app + WebView2/helper khi rảnh và khi mở vòng tròn, CPU idle, thời gian từ Alt + Shift đến paint. Dùng cùng máy/tài liệu để so với Electron.
 
-Các biên nhận nằm trong `.cache/engine-check.json`, `.cache/visual-check.json` và `.cache/runtime-check.json`. Ảnh renderer nằm trong `.cache/visual-smoke/previews/`. Chạy lại kiểm tra sẽ cập nhật các đầu ra này; chúng không được commit.
-
-`test:setup` dùng hồ sơ riêng dưới `.cache/setup-smoke/` và ghi `.cache/setup-check.json`. Nó chạy main/preload/renderer và engine thật; thay thế tray, bộ đọc lựa chọn, hộp chọn thư mục và thao tác mở trình duyệt. Không thay đổi startup hoặc Desktop của người phát triển. Kiểm tra này xác nhận URL MIT được yêu cầu mở, không truy cập GitHub thật.
-
-## Cần nghiệm thu thủ công
-
-- Chọn tệp trên Desktop/Explorer, giữ Alt + Shift, kéo sang đích, nhả phím để hủy; lặp lại với tệp khác sau thành công và sau lỗi.
-- Nhiều màn hình, DPI khác nhau, Explorer có nhiều tab và tệp nằm sát các mép màn hình.
-- Cài/gỡ trên Windows sạch, đăng nhập lại để kiểm tra tự khởi động và mục HKCU Run; macro installer được kiểm tra khi đóng gói, chưa được nghiệm thu bằng reboot máy sạch.
-- Bộ cài mới: chọn ngôn ngữ, Next bị khóa khi chưa tick đồng ý MIT, link mở GitHub, hủy cài không ghi ứng dụng, chọn thư mục cài tùy chỉnh; cài/cập nhật vẫn giữ lựa chọn startup đã tắt.
-- Tài liệu phức tạp, font thiếu, bảng biểu và bản trình chiếu thực tế. Không suy ra độ chính xác mọi tài liệu từ fixture nhỏ.
-
-Hộp thông báo được kiểm tra như giao diện React thật: thời gian tăng khi chạy, nội dung thay đổi theo tác vụ, nút Mở thư mục/Thử lại gọi hành động tương ứng. Các góc bo của cửa sổ được kiểm tra pixel trong suốt ở cả trạng thái đang chạy, thành công, lỗi chuyển đổi và lỗi đọc lựa chọn. Ảnh trong `.cache/` chỉ là đầu ra kiểm tra.
+Không suy ra độ mượt, RAM hoặc chất lượng giữ bố cục tài liệu từ framework hay từ fixture nhỏ. Không công bố các số đo chưa thực hiện. Application Control chặn executable phải được ghi nhận là chưa chạy được, không tính thành test pass.

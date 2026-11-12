@@ -1,7 +1,7 @@
 import {useEffect,useId,useRef,useState,type PointerEvent,type CSSProperties} from 'react';
 import {ringLayout,ringHit,ringWedge,type Anchor} from './ring-layout';
 import {useDockMotion} from './use-dock-motion';
-import type {Language} from '../electron/contracts';
+import type {Language} from '../shared/contracts';
 import './radial-menu.css';
 
 const primary=['pdf','docx','xlsx','pptx','txt'];

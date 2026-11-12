@@ -15,6 +15,10 @@ Recipients can obtain the corresponding upstream source from the source link abo
 
 The application logo was supplied by the user; Warp's MIT code license does not grant additional rights to that artwork.
 
+## Application shell
+
+Warp 0.6 uses Tauri and the system Microsoft Edge WebView2 runtime. Tauri is licensed under MIT OR Apache-2.0. The customized NSIS template in `scripts/tauri-installer.nsi` is based on the official `tauri-cli-v2.12.4` template; copyright (c) 2017–Present Tauri Apps Contributors. Its MIT license is retained in `scripts/TAURI-LICENSE-MIT`. Rust/JavaScript dependencies retain their respective upstream licenses. WebView2 is distributed and updated by Microsoft under its own terms.
+
 ## Documentation diagrams
 
 The architecture SVG in `docs/assets/` was generated with [Archify 3.2.0](https://github.com/tt-a1i/archify), distributed under Apache-2.0. Copyright (c) 2026 tt-a1i (Archify); copyright (c) 2025 Cocoon AI. The generated SVG retains its embedded software notices and license texts.
