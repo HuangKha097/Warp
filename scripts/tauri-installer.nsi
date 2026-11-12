@@ -424,8 +424,10 @@ Var AppStartMenuFolder
 
 !include nsDialogs.nsh
 !include LogicLib.nsh
+!include WinMessages.nsh
 Var WarpConsent
-Var WarpLicenseText
+Var WarpConsentAccepted
+Var WarpLicenseEdit
 Var WarpLicenseLine
 Var WarpLicenseFile
 LangString WarpLicenseTitle 1033 "MIT license"
@@ -450,35 +452,52 @@ Function WarpLicensePage
   ${If} $0 == error
     Abort
   ${EndIf}
+  ${IfThen} $(^RTL) = 1 ${|} nsDialogs::SetRTL $(^RTL) ${|}
+  nsDialogs::CreateControl "EDIT" "${WS_VISIBLE}|${WS_CHILD}|${WS_TABSTOP}|${WS_VSCROLL}|${ES_MULTILINE}|${ES_AUTOVSCROLL}|${ES_READONLY}" "${WS_EX_CLIENTEDGE}" 0 0 100% 92u ""
+  Pop $WarpLicenseEdit
   InitPluginsDir
   File /oname=$PLUGINSDIR\warp-license.txt "{{license}}"
-  StrCpy $WarpLicenseText ""
   FileOpen $WarpLicenseFile "$PLUGINSDIR\warp-license.txt" r
   license_read:
     ClearErrors
     FileRead $WarpLicenseFile $WarpLicenseLine
     IfErrors license_done
-    StrCpy $WarpLicenseText "$WarpLicenseText$WarpLicenseLine"
+    StrCpy $1 $WarpLicenseLine 1 -1
+    ${If} $1 == "$\n"
+      StrCpy $WarpLicenseLine $WarpLicenseLine -1
+    ${EndIf}
+    StrCpy $1 $WarpLicenseLine 1 -1
+    ${If} $1 == "$\r"
+      StrCpy $WarpLicenseLine $WarpLicenseLine -1
+    ${EndIf}
+    StrCpy $WarpLicenseLine "$WarpLicenseLine$\r$\n"
+    SendMessage $WarpLicenseEdit ${EM_REPLACESEL} 0 "STR:$WarpLicenseLine"
     Goto license_read
   license_done:
   FileClose $WarpLicenseFile
-  nsDialogs::CreateControl "EDIT" "${WS_VISIBLE}|${WS_CHILD}|${WS_TABSTOP}|${WS_VSCROLL}|${ES_MULTILINE}|${ES_AUTOVSCROLL}|${ES_READONLY}" "${WS_EX_CLIENTEDGE}" 0 0 100% 105u "$WarpLicenseText"
-  Pop $0
-  ${NSD_CreateLink} 0 112u 100% 15u "$(WarpLicenseLink)"
+  SendMessage $WarpLicenseEdit ${EM_SETSEL} 0 0
+  SendMessage $WarpLicenseEdit ${EM_SCROLLCARET} 0 0
+  ${NSD_CreateLink} 0 98u 100% 12u "$(WarpLicenseLink)"
   Pop $0
   ${NSD_OnClick} $0 WarpOpenLicense
-  ${NSD_CreateCheckbox} 0 137u 100% 20u "$(WarpLicenseAccept)"
+  ${NSD_CreateCheckbox} 0 114u 100% 16u "$(WarpLicenseAccept)"
   Pop $WarpConsent
+  ${If} $WarpConsentAccepted == 1
+    ${NSD_Check} $WarpConsent
+  ${EndIf}
   ${NSD_OnClick} $WarpConsent WarpConsentClicked
   Call WarpConsentChanged
+  ${NSD_SetFocus} $WarpConsent
   nsDialogs::Show
 FunctionEnd
 Function WarpConsentChanged
   ${NSD_GetState} $WarpConsent $0
   GetDlgItem $1 $HWNDPARENT 1
   ${If} $0 == ${BST_CHECKED}
+    StrCpy $WarpConsentAccepted 1
     EnableWindow $1 1
   ${Else}
+    StrCpy $WarpConsentAccepted 0
     EnableWindow $1 0
   ${EndIf}
 FunctionEnd

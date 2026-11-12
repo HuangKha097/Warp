@@ -12,7 +12,7 @@
   <a href="https://github.com/HuangKha097/Warp/issues">Báo lỗi</a>
 </p>
 
-<p align="center">Windows x64 · Tauri + React · Mã nguồn 0.6.0</p>
+<p align="center">Windows x64 · Tauri + React · Mã nguồn 0.6.1</p>
 
 <p align="center">
   <img src="docs/assets/radial-menu.png" width="440" alt="Vòng tròn chọn định dạng của Warp">

@@ -1,7 +1,7 @@
 import type {AppState,Bridge,SettingsState} from '../../shared/contracts';
 const mode=new URLSearchParams(location.search).get('mode');
 const state:AppState={file:'tài liệu.txt',path:'C:\\Documents\\tài liệu.txt',targets:['pdf','docx','odt'],busy:false,helperReady:true,anchor:{x:500,y:400},presentation:1,job:null,language:'vi'};
-const settings:SettingsState={preferences:{language:'vi',launchAtLogin:true,outputMode:'source',outputDirectory:null,onboardingCompleted:false},version:'0.6.0',installDirectory:'C:\\Warp',settingsFile:'C:\\Users\\test\\AppData\\Roaming\\Warp\\settings.json',packaged:true};
+const settings:SettingsState={preferences:{language:'vi',launchAtLogin:true,outputMode:'source',outputDirectory:null,onboardingCompleted:false},version:'0.6.1',installDirectory:'C:\\Warp',settingsFile:'C:\\Users\\test\\AppData\\Roaming\\Warp\\settings.json',packaged:true};
 const calls:{name:string;value?:unknown}[]=[];
 const stateListeners=new Set<(s:AppState)=>void>(),settingsListeners=new Set<(s:SettingsState)=>void>();
 if(mode==='status')state.job={id:1,input:state.path!,name:state.file!,target:'pdf',status:'running',phase:'converting',startedAt:Date.now()-2000,queued:1,completed:0,failures:[]};
